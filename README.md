@@ -13,7 +13,7 @@ O projeto foi modularizado em "biblioteca", "include" e "tradutor.c".<br>
 ## Compilação
 O tradutor deve ler um arquivo em BPL da entrada padrão (e.g., usando o scanf) e imprimir a tradução desse programa em Assembly na saída padrão (e.g., usando o printf). Pode-se criar um arquivo com a linguagem e utilizar o redirecionamento para testar:
 
-` ./tradutor < prog.blp `
+` ./tradutor < prog.bpl `
 
 ## Desenvolvedores
 - [Iury Alexandre Alves Bo](https://github.com/iuryalvez)

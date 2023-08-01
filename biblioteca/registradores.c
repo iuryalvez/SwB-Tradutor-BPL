@@ -1,4 +1,4 @@
-#include <../include/registradores.h>
+#include "../include/registradores.h"
 
 Registrador REGISTRADORES[MAX_REG];
 

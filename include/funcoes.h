@@ -1,2 +1,5 @@
+#include "padrao.h"
+#include <stdbool.h>
 
-void def_funcao();
+void call_funcao();
+

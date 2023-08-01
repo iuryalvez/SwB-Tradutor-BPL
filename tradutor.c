@@ -1,9 +1,22 @@
-#include <tradutor.h>
+#include "./include/tradutor.h"
 
 int main() {
     
-    // ler uma função 
-    def_funcao();
+    cabecalho();
+    
+    // chamar uma função 
+    call_funcao();
+
 
     return 0;
+}
+
+void cabecalho() {
+    
+    printf(".section rodata\n\n");
+    printf(".data\n\n");
+    printf(".text\n\n");
+    
+    return;
+
 }
