@@ -1,6 +1,19 @@
 # Tradutor BPL (Bruno's Programming Language) para Assembly AMD64
 Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
+## Tasks de desenvolvimento (temporário)
+- [ ] Implementar regra para diferenciar tipos de variáveis locais (var, vet e reg)
+- [ ] Implementar o assembly do armazenamento de variáveis inteiras na pilha
+- [ ] Implementar o assembly do armazenamento de arrays na pilha 
+- [ ] Implementar o assembly da atribuição de registradores
+- [ ] Implementar o assembly final da chamada de funções (recuperação de regist. da pilha e retorno)
+
+### Rafael
+- [ ] Implementar o assembly de início da chamada das funções de acordo com parâmetros (armazenamento de regist. na pilha)
+### Iury
+
+### Vinicius
+
 ## Introdução
 O trabalho propõe a criação de um tradutor de BPL para Assembly AMD64. O enunciado do projeto está na pasta "especificacoes" que contém 2 pdf's das versões do trabalho.
 
