@@ -1,0 +1,2 @@
+
+void def_funcao();
