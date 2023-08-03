@@ -1,5 +1,14 @@
 function f1 pa1 pi2 pa3
+def
+blabla
+enddef
+blabla
+end
 
-function f2 pi1 pi2
+function f2 pi1
+def
+blabla
+enddef
+blabla
+end
 
-function f3

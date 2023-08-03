@@ -7,7 +7,6 @@ int main() {
     // chamar uma função 
     call_funcao();
 
-
     return 0;
 }
 

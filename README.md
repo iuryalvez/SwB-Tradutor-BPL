@@ -6,10 +6,13 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 - [ ] Implementar o assembly do armazenamento de variáveis inteiras na pilha
 - [ ] Implementar o assembly do armazenamento de arrays na pilha 
 - [ ] Implementar o assembly da atribuição de registradores
-- [ ] Implementar o assembly final da chamada de funções (recuperação de regist. da pilha e retorno)
+- [ ] Implementar a regra e assembly para chamada de funções (call)
+- [ ] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call)
+- [ ] Implementar o assembly do armazenamento dasvariáveis de registradores na pilha (no caso de call)
 
 ### Rafael
-- [ ] Implementar o assembly de início da chamada das funções de acordo com parâmetros (armazenamento de regist. na pilha)
+- [x] Implementar o assembly de início da chamada das funções
+- [ ] Implementar o assembly final de execução das funções
 ### Iury
 
 ### Vinicius

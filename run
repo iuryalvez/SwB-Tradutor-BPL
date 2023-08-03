@@ -1,0 +1,4 @@
+#!/bin/bash
+
+gcc -o test tradutor.c ./biblioteca/*.c
+./test < data
