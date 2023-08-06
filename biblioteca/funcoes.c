@@ -1,81 +1,66 @@
 #include "../include/funcoes.h"
+ 
+void salvar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]) {
+    int i; // variável de iteração
+    int ind_param = 5; // índice de parâmetro
 
-void call_funcao() {
+    alinhar_tampilha(tampilha, 8);
+
+    printf("\n    # %d parametro(s) a ser(em) salvo(s)\n", nro_param-1);
+    printf("    subq $%d, %%rsp\n", (nro_param-1) * 8);
+    for (i = 0; i < nro_param-1; i++) {
+        *tampilha += 8;
+        printf("    # salvando %dº parametro na pilha\n", i+1);
+        printf("    movq    %%%s, -%d(%%rbp)\n", r[ind_param].nome64, *tampilha);
+        ind_param--;
+    }
+}
+
+void recuperar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]) {
     
-    int indice_funcao; // índice da função atual
-    int nro_param; // número de parâmetros da função atual
-    char tipo_param[3]; // tipo de parâmetro
-    char linha[TAM_LINHA];
+    int i; // variável de iteração
+    int ind_param = 7-nro_param; // índice de parâmetro
 
-    // variáveis de controle e contagem da pilha
-    int offset = 0;
-    int alocacao = 0;
+    printf("\n    # %d parametro(s) a ser(em) recuperado(s)\n", nro_param-1);
+    for (i = nro_param-1; i > 0; i--) {
+        printf("    # recuperando %dº parametro na pilha\n", i);
+        printf("    movq    -%d(%%rbp), %%%s\n", *tampilha, r[ind_param].nome64);
+        *tampilha -= 8;
+        ind_param++;
+    }
+    
+    printf("    addq    $%d, %%rsp\n", (nro_param-1) * 8);
+    
+}
 
-    // flags de controle
-    bool bloco_declaracao = true;
-    bool bloco_def = false;
-    bool bloco_funcao = false;
+void iniciar_vlp(vl vlp[8]) {
+    for (int i = 0; i < 8; i++) {
+        vlp[i].indice = -1;
+    }
+}
 
-    // contadores de variáveis locais
-    int cont_var = 0;
-    int cont_reg = 0;
-    int cont_vet = 0;
+void armazenar_vlp(vl vlp[8], int qtd_vlp, int tampilha) {
+    int i;
+    printf("    subq    %d, %%rsp\n", tampilha);
+    for (i = 0; i < qtd_vlp; i++, tampilha -= vlp[i].pos_pilha) { 
+        if ((vlp[i].pos_pilha-1) % 8 == 7) printf("    movq    $0, -%d(%%rbp)\n", vlp[i].pos_pilha);
+        else printf("    movl    $0, -%d(%%rbp)\n", vlp[i].pos_pilha);
+    }
+}
 
-    while(ler_linha(linha) != false) { // continua o loop linha a linha enqunto não chega numa linha nula ou no EOF 
-
-        if (linha == '\0') continue; // se a linha for vazia, vai para a próxima
-
-        if (bloco_declaracao) { // se a flag estiver ativa, procuraremos a declaração
-            
-            if (strncmp(linha, "function", 8) == 0){ // verifica se a linha inicia com a declaração de uma função
-
-                nro_param = sscanf(linha, "function f%d p%c1 p%c2 p%c3", &indice_funcao, &tipo_param[0], &tipo_param[1], &tipo_param[2]);
-
-                printf(".globl f%d\n", indice_funcao);
-                printf("f%d:\n\tpushq %rbp\n\tmovq %rsp, %rbp\n", indice_funcao);
-                
-                continue;
-            }
-            
-            if (strncmp(linha, "def", 3) == 0){ // verifica se a linha é o início da definição de variáveis
-                
-                bloco_declaracao = false; // finaliza a declaração
-                bloco_def = true; // permite o início da definição de variáveis
-                
-                continue;
-            }
-
-        }
-
-        if (bloco_def) {
-
-            // código da definição de variáveis aqui
-            
-            if (strncmp(linha, "enddef", 6) == 0) { // verifica se a linha é o fim da definição de variáveis
-                
-                bloco_def = false; // finaliza a definição de variáveis
-                bloco_funcao = true; // permite o início do corpo da função
-                
-                continue;
-            }
-        }
-
-        if (bloco_funcao) {
-
-            // código do corpo da função aqui (cálculos, chamadas de outras funções, etc)
-
-            if (strncmp(linha, "end", 3) == 0) { // verifica se a linha é uma finalização de função
-                
-                // código da finalização de função aqui (recuperação de v)
-                printf("\tleave\n\tret\n");
-
-                bloco_funcao = false; // finaliza o corpo da função
-                bloco_declaracao = true; // permite o início de uma nova declaração de função
-                
-                continue;
-            }
-        }
-
+void armazenar_vr(int ind_reg[4], int qtd_reg, Registrador r[MAX_REG]) {
+    int i;
+    int ind;
+    printf("\n");
+    for (i = 0, ind = 8; i < qtd_reg; i++, ind++) {
+        printf("    # vr%d = 0\n", ind_reg[i]); // comentário de linha
+        printf("    movq    $0, %%%s\n\n", r[ind].nome64); // rcx
     }
 
+}
+
+void alinhar_tampilha(int *tampilha, int alinhamento) {
+    while (*tampilha % alinhamento != 0) {
+        *tampilha += 4;
+    }
 }

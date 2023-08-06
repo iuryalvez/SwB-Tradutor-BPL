@@ -1,14 +1,22 @@
 function f1 pa1 pi2 pa3
 def
-blabla
+vet va1 size ci10
+vet va2 size ci20
+var vi3
+reg vr4
+var vi5
+reg vr6
 enddef
 blabla
+call
 end
 
 function f2 pi1
 def
-blabla
+var vi1
+reg vr2
+var vi3
 enddef
 blabla
+call
 end
-

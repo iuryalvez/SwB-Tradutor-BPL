@@ -2,18 +2,19 @@
 Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
 ## Tasks de desenvolvimento (temporário)
-- [ ] Implementar regra para diferenciar tipos de variáveis locais (var, vet e reg)
 - [ ] Implementar o assembly do armazenamento de variáveis inteiras na pilha
 - [ ] Implementar o assembly do armazenamento de arrays na pilha 
 - [ ] Implementar o assembly da atribuição de registradores
 - [ ] Implementar a regra e assembly para chamada de funções (call)
-- [ ] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call)
-- [ ] Implementar o assembly do armazenamento dasvariáveis de registradores na pilha (no caso de call)
+- [ ] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call)
 
 ### Rafael
 - [x] Implementar o assembly de início da chamada das funções
 - [ ] Implementar o assembly final de execução das funções
+
 ### Iury
+- [x] Implementar regra para diferenciar tipos de variáveis locais (var, vet e reg)
+- [x] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call) - incompleto
 
 ### Vinicius
 
