@@ -14,6 +14,13 @@ void remover_newline(char *ptr);
 /**
  * @brief lê uma nova linha
  * 
- * @return retorna verdadeiro ou falso
+ * @return verdadeiro ou falso
  */
 bool ler_linha(char *string);
+
+/**
+ * @brief formata o proximo printf
+ * 
+ * @param profundidade profundidade da chamada
+ */
+void tab(int profundidade);
