@@ -1,3 +1,6 @@
+#ifndef REGISTRADORES_H
+#define REGISTRADORES_H
+
 #include <stdbool.h>
 #include <string.h>
 
@@ -11,8 +14,6 @@ struct registrador {
 
 typedef struct registrador Registrador;
 
-void iniciar_registradores();
+void iniciar_registradores(Registrador r[MAX_REG]);
 
-void salvar_registradores();
-
-void recuperar_registradores();
+#endif

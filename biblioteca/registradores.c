@@ -1,6 +1,6 @@
 #include "../include/registradores.h"
 
-void iniciar_registradores(Registrador r[16]) {
+void iniciar_registradores(Registrador r[MAX_REG]) {
     
     strcpy(r[0].nome32, "eax");
     strcpy(r[0].nome64, "rax");

@@ -1,6 +1,8 @@
 #include "./include/tradutor.h"
 
-/* Modificações IURY (06/08 - 2h51): 
+/*  Última modificação 06/08 - 15h13
+
+    Modificações IURY (06/08 - 2h51): 
     
     -> formatação: organizei algumas formatações. obs: utilizar o tab do teclado e não o \t porque o \t é muito grande;
     
@@ -11,11 +13,25 @@
        pilha (junto com a ideia de múltiplo), criei novas variáveis (vlp, ind_reg); 
     
     -> problemas: 
-        - criei as funções de salvar e recuperar os registradores de parâmetros ao ler um call, mas tem
+        - 1. criei as funções de salvar e recuperar os registradores de parâmetros ao ler um call, mas tem
           algo errado na implementação, verificar depois e corrigir; 
-        - ao compilar o código surge alguns warnings em relação ao uso da struct registrador, verificar 
+        - 2. ao compilar o código surge alguns warnings em relação ao uso da struct registrador, verificar 
           depois e corrigir.
-          
+
+    Modificações IURY (06/08 - 14h24):
+    
+    -> arquivo shell: acrescentei o clear antes e exclui o arquivo test depois de executá-lo para que caso um programa
+       que não deve compilar compile. 
+
+    -> refactor: refatorei os códigos de armazenar as variáveis e os registradores, mas não sei até que ponto está dando certo;
+    
+    -> fix problema 1: implementei as funções de salvar e recuperar parâmetros antes da chamada de função;
+    
+    -> fix problema 2: o problema não estava deixando o código compilar, faltava as declarações ifndef nos arquivos .h
+       tentei criar uma variável global (entre os arquivos) para representar os registradores mas não consegui, tive
+       que continuar com a implementação da variável dentro do bloco da main, com o ifndef agora está funcionando.
+
+    -> o que precisa ser feito: reavaliar a função de alinhar pilha para ter certeza que vai funcionar em todos os casos 
 */
 
 int main() {
@@ -25,7 +41,8 @@ int main() {
     printf(".data\n\n");
     printf(".text\n\n");
     
-    Registrador registradores[16]; // registradores disponíveis
+    Registrador r[MAX_REG];
+
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
 
     // variáveis de declaração de função
@@ -75,7 +92,7 @@ int main() {
                 bloco_declaracao = false; // finaliza a declaração
                 bloco_def = true; // permite o início da definição de variáveis
 
-                iniciar_registradores(registradores);
+                iniciar_registradores(r);
                 
                 continue;
             }
@@ -87,8 +104,11 @@ int main() {
             if (strncmp(linha, "enddef", 6) == 0) { // verifica se a linha é o fim da definição de variáveis
                 bloco_def = false;   // finaliza a definição de variáveis
                 bloco_funcao = true; // permite o início do corpo da função
-
-                if (cont_reg) armazenar_reg(ind_reg, cont_reg);
+                
+                // se houver variáveis locais de registradores, armazenamos
+                if (cont_reg) armazenar_vr(ind_reg, cont_reg, r); 
+                
+                // se houver variáveis locais de pilha, armazenamos
                 if (cont_vlp) armazenar_vlp(vlp, cont_vlp, tampilha);
 
                 continue;
@@ -97,40 +117,7 @@ int main() {
             // código da definição de variáveis aqui
             if (sscanf(linha, "reg vr%d", &ind_reg[cont_reg]) == 1) {
 
-                printf("    # vr%d = 0\n", ind_reg[cont_reg]); // comentário de linha
-                
-                if (cont_reg == 0) { 
-                    printf("    movq  $0, %%%s\n\n", registradores[2].nome64); // rcx
-                    registradores[3].livre = false;
-                    cont_reg++;
-                    continue;
-
-                } else if (cont_reg == 1) {
-
-                    printf("    movq  $0, %%%s\n\n", registradores[8].nome64); // r8
-                    registradores[8].livre = false;
-                    cont_reg++;
-                    continue;
-                    
-                } else if (cont_reg == 2) {
-                
-                    printf("    movq  $0, %%%s\n\n", registradores[9].nome64); // r9
-                    registradores[9].livre = false;
-                    cont_reg++;
-                    continue;
-                
-                } else if (cont_reg == 3) {
-
-                    printf("    movq  $0, %%%s\n\n", registradores[10].nome64); // r10
-                    registradores[10].livre = false;
-                    cont_reg++;
-                    continue;
-
-                }
-                else {
-                    printf("Tem algo de errado entre def e enddef.\n");
-                    return 0;
-                }
+                cont_reg++;
                 
             }
             if (sscanf(linha, "var vi%d", &vlp[cont_vlp].indice) == 1) {
@@ -167,15 +154,17 @@ int main() {
                 bloco_funcao = false; // finaliza o corpo da função
                 bloco_declaracao = true; // permite o início de uma nova declaração de função
                 
+                // agora é necessário reiniciar os valores das variáveis para a próxima função
+
                 continue;
             }
 
             if (strncmp(linha, "call", 3) == 0) { // verifica se a linha é uma chamada de função
-                salvar_parametros(nro_param, &tampilha, registradores);
+                salvar_parametros(nro_param, &tampilha, r);
                 
                 // código de chamada de função aqui
 
-                recuperar_parametros(nro_param, &tampilha, registradores);
+                recuperar_parametros(nro_param, &tampilha, r);
             }
         }
 

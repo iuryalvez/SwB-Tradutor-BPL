@@ -1,4 +1,6 @@
 #!/bin/bash
 
+clear
 gcc -o test tradutor.c ./biblioteca/*.c
 ./test < data
+rm test

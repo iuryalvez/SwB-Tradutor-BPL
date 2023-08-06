@@ -1,3 +1,6 @@
+#ifndef FUNCOES_H
+#define FUNCOES_H
+
 #include "padrao.h"
 #include "registradores.h"
 #include <stdbool.h>
@@ -16,18 +19,18 @@ typedef struct variavel_local vl;
  * 
  * @param nro_param número de parâmetros da função
  * @param tampilha tamanho da pilha da função
- * @param r registradores da função
+ * @param r registradores 
  */
-void salvar_parametros(int nro_param, int *tampilha, Registrador r[16]);
+void salvar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]);
 
 /**
  * @brief recupera os parâmetros de uma função acordo com sua quantidade
  * 
  * @param nro_param número de parâmetros da função
  * @param tampilha tamanho da pilha da função
- * @param r registradores da função
+ * @param r registradores
  */
-void recuperar_parametros(int nro_param, int *tampilha, Registrador r[16]);
+void recuperar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]);
 
 /**
  * @brief iniciar valores padrão (-1) no vetor de variáveis locais
@@ -41,14 +44,15 @@ void iniciar_vlp(vl vlp[8]);
  * 
  * @param ind_reg índice dos registradores
  * @param qtd_reg quantidade de variáveis de registradores
+ * @param r registradores
  */
-void armazenar_reg(int ind_reg[4], int qtd_reg);
+void armazenar_vr(int ind_reg[4], int qtd_reg, Registrador r[MAX_REG]);
 
 /**
  * @brief armazenamento das variáveis locais da pilha
  * 
- * @param vls variáveis locais de pilha
- * @param qtd_vls quantidade de variáveis locais de pilha
+ * @param vlp variáveis locais de pilha
+ * @param qtd_vlp quantidade de variáveis locais de pilha
  * @param tampilha tamanho da pilha
  */
 void armazenar_vlp(vl vlp[8], int qtd_vlp, int tampilha);
@@ -60,3 +64,5 @@ void armazenar_vlp(vl vlp[8], int qtd_vlp, int tampilha);
  * @param alinhamento alinhamento desejado
  */
 void alinhar_tampilha(int * tampilha, int alinhamento);
+
+#endif

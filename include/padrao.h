@@ -1,3 +1,6 @@
+#ifndef PADRAO_H
+#define PADRAO_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
@@ -24,3 +27,5 @@ bool ler_linha(char *string);
  * @param profundidade profundidade da chamada
  */
 void tab(int profundidade);
+
+#endif
