@@ -36,6 +36,12 @@
 
 int main() {
 
+    char nomefuncao[128];
+
+
+    int salvos[5]; // de 0 a 3 salva o index dos registradores salvos e na posição 4 salva quantos registradores foram salvos.
+
+
     // cabeçalho de um arquivo assembly
     printf(".section rodata\n\n");
     printf(".data\n\n");
@@ -46,8 +52,8 @@ int main() {
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
 
     // variáveis de declaração de função
-    int indice_funcao;     // índice da função
-    int nro_param;         // número de parâmetros da função
+    int indice_funcao = 0;     // índice da função
+    int nro_param = 0;         // número de parâmetros da função
     char tipo_param[3];    // tipo de parâmetro
 
     // variáveis de controle e contagem da pilha
@@ -59,10 +65,21 @@ int main() {
     int cont_reg = 0; // contador de registradores
     int cont_vlp = 0; // contador de variaveis locais de pilha
 
+    reinicializa_parametros(&indice_funcao, &nro_param, tipo_param, &tampilha, vlp, ind_reg, &cont_reg, &cont_vlp); // inicializando parametros
+
     // flags de controle
     bool bloco_declaracao = true; // flag do bloco de declaração da função
     bool bloco_def = false;       // flag do bloco de definição de variáveis locais da função  
     bool bloco_funcao = false;    // flag do bloco de execução da função
+
+    /*
+        Testando as funções
+    
+        printacontrole(indice_funcao, nro_param, tipo_param, tampilha, vlp, ind_reg, cont_reg, cont_vlp);
+        reinicializa_parametros(&indice_funcao, &nro_param, tipo_param, &tampilha, vlp, ind_reg, &cont_reg, &cont_vlp);
+        printf("\n\nReiniciliazado\n\n");
+        printacontrole(indice_funcao, nro_param, tipo_param, tampilha, vlp, ind_reg, cont_reg, cont_vlp);
+    */
 
     while(ler_linha(linha) != false) { // continua o loop linha a linha enquanto não chega numa linha nula ou no EOF 
 
@@ -116,7 +133,7 @@ int main() {
 
             // código da definição de variáveis aqui
             if (sscanf(linha, "reg vr%d", &ind_reg[cont_reg]) == 1) {
-
+                
                 cont_reg++;
                 
             }
@@ -155,14 +172,21 @@ int main() {
                 bloco_declaracao = true; // permite o início de uma nova declaração de função
                 
                 // agora é necessário reiniciar os valores das variáveis para a próxima função
+                reinicializa_parametros(&indice_funcao, &nro_param, tipo_param, &tampilha, vlp, ind_reg, &cont_reg, &cont_vlp);
+                iniciar_registradores(r);
 
                 continue;
             }
 
             if (strncmp(linha, "call", 3) == 0) { // verifica se a linha é uma chamada de função
+                sscanf(linha, "call %s", nomefuncao); // TEM QUE FAZER
                 salvar_parametros(nro_param, &tampilha, r);
                 
-                // código de chamada de função aqui
+                salvar_reg(r, &tampilha, salvos);
+                
+                printf("    call %s\n", nomefuncao);
+
+                recuperar_reg(r, &tampilha, salvos);
 
                 recuperar_parametros(nro_param, &tampilha, r);
             }
