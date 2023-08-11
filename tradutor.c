@@ -5,21 +5,15 @@ int main() {
     printf(".section rodata\n\n");
     printf(".data\n\n");
     printf(".text\n\n");
-    
-    int rsp = 0;     // tamanho da pilha da função
-    // int padding = 0; // armazenar o padding da pilha
 
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
+
+    Pilha pilha; 
 
     // variáveis de declaração de função
     int indice_funcao = 0; // índice da função
     char nomefuncao[5]; // f9999 (5 letras)
     
-    Param param; // variável de parâmetro (declaração da função)
-    inicializar_param(&param);
-
-    VL vl; // variáveis locais (def e enddef)
-    inicializar_vl(&vl);
 
     // flags de controle
     bool bloco_declaracao = true; // flag do bloco de declaração da função
@@ -34,15 +28,13 @@ int main() {
             
             if (strncmp(linha, "function", 8) == 0){ // verifica se a linha inicia com a declaração de uma função
 
-                rsp = 0;
-                // padding = 0;
-                inicializar_param(&param);
+                inicializar_pilha(&pilha);                
 
-                param.qtd = sscanf(linha, "function f%d p%c1 p%c2 p%c3", &indice_funcao, &param.tipo[0], &param.tipo[1], &param.tipo[2]);
+                pilha.param_qtd = sscanf(linha, "function f%d p%c1 p%c2 p%c3", &indice_funcao, &pilha.param[0].tipo, &pilha.param[1].tipo, &pilha.param[2].tipo);
                 
-                --param.qtd;
+                --pilha.param_qtd; // atualizando a quantidade de parâmetros que o sscanf retornou para armazenar de fato a qtd de parâmetros
 
-                if (param.qtd == -1 || param.qtd > 3) {
+                if (pilha.param_qtd == -1 || pilha.param_qtd > 3) {
                     printf("Tem algo de errado na declaracao da funcao.\n");
                     return 0;
                 }
@@ -59,9 +51,6 @@ int main() {
                 
                 bloco_declaracao = false; // finaliza a declaração
                 bloco_def = true; // permite o início da definição de variáveis
-
-                // iniciar os valores das variáveis para a próxima função
-                inicializar_vl(&vl);
                 
                 continue;
             }
@@ -71,37 +60,48 @@ int main() {
             if (strncmp(linha, "enddef", 6) == 0) { // verifica se a linha é o fim da definição de variáveis
                 bloco_def = false;   // finaliza a definição de variáveis
                 bloco_funcao = true; // permite o início do corpo da função
-                
-                // padding = rsp; 
-                alinhar_rsp(&rsp, 16); // se houver padding, rsp será atualizado
-                // padding = rsp - padding; 
-                
-                printf("    subq    $%d, %%rsp\n", rsp);
 
-                armazenar_vl(&vl);
+                // armazenando a posição na pilha das variáveis de declaração de função 
+                for (int i = 0; i < pilha.param_qtd; i++) {
+                    if (pilha.param[i].tipo == 'i') { // se for do tipo inteiro
+                        pilha.rsp += 4; // não precisa alinhar porque 4 é múltiplo de 4, 8, 16
+                        pilha.param[i].pos = pilha.rsp; // guarda a posição na pilha
+                    } else {
+                        alinhar(&(pilha.rsp), 8);  // precisa alinhar para 8 (ponteiro) pq não sabemos se está alinhado
+                        pilha.rsp += 8;      // desce o topo da pilha para colocar mais uma variável
+                        pilha.param[i].pos = pilha.rsp; // guarda a posição na pilha
+                    }
+                }
+
+                alinhar(&(pilha.rsp), 16);
+                
+                printf("\n    # armazenar todas as variáveis (inclusive os registradores de parametros)\n");
+                printf("    subq    $%d, %%rsp\n", pilha.rsp);
+
+                armazenar_pilha(pilha);
                 
                 continue;
             }
 
             // lendo as variáveis locais e registrando suas posições na pilha
-            if (sscanf(linha, "reg vr%d", &vl.reg[vl.reg_qtd].ind) == 1 && indice_funcao != 1) {
-                alinhar_rsp(&rsp, 8);
-                rsp += 8;
-                vl.reg[vl.reg_qtd].pos = rsp;
-                vl.reg_qtd++;
+            if (sscanf(linha, "reg vr%d", &pilha.reg[pilha.reg_qtd].ind) == 1 && indice_funcao != 1) {
+                alinhar(&(pilha.rsp), 8);
+                pilha.rsp += 8;
+                pilha.reg[pilha.reg_qtd].pos = pilha.rsp;
+                pilha.reg_qtd++;
                 continue;
             }
-            if (sscanf(linha, "var vi%d", &vl.var[vl.var_qtd].ind) == 1) {
-                rsp += 4;
-                vl.var[vl.var_qtd].pos = rsp;
-                vl.var_qtd++;
+            if (sscanf(linha, "var vi%d", &pilha.var[pilha.var_qtd].ind) == 1) {
+                pilha.rsp += 4;
+                pilha.var[pilha.var_qtd].pos = pilha.rsp;
+                pilha.var_qtd++;
                 continue;
             }
-            if (sscanf(linha, "vet va%d size ci%d", &vl.vet[vl.vet_qtd].ind, &vl.vet[vl.vet_qtd].size) == 2) {
-                alinhar_rsp(&rsp, 8);
-                rsp += 8 * vl.vet[vl.vet_qtd].size;
-                vl.vet[vl.vet_qtd].pos = rsp;
-                vl.vet_qtd++;
+            if (sscanf(linha, "vet va%d size ci%d", &pilha.vet[pilha.vet_qtd].ind, &pilha.vet[pilha.vet_qtd].size) == 2) {
+                alinhar(&(pilha.rsp), 8);
+                pilha.rsp += 8 * pilha.vet[pilha.vet_qtd].size;
+                pilha.vet[pilha.vet_qtd].pos = pilha.rsp;
+                pilha.vet_qtd++;
                 continue;
             }        
         }
@@ -111,9 +111,7 @@ int main() {
             // código do corpo da função aqui (cálculos, chamadas de outras funções, etc)
             if (strncmp(linha, "end", 3) == 0) { // verifica se a linha é uma finalização de função
                 
-                recuperar_vl(vl);
-
-                printf("    addq    $%d, %%rsp\n", rsp);
+                recuperar_pilha(pilha);
 
                 // código da finalização de função aqui (recuperação de v)
                 printf("\n    leave\n");
@@ -124,20 +122,14 @@ int main() {
                 
                 continue;
             }
-
             if (strncmp(linha, "call", 3) == 0) { // verifica se a linha é uma chamada de função
                 sscanf(linha, "call %s", nomefuncao);
 
-                // rsp -= padding;
-                
-                salvar_parametros(&param, &rsp); // salvar e mostrar que salvou os parâmetros da declaração da função
-                alinhar_rsp(&rsp, 16);
-                
-                printf("    call %s\n", nomefuncao);
-                
-                recuperar_parametros(&param, &rsp); // recuperar e mostrar que recuperou os parâmetros da declaração da função
-                
-                // rsp += padding;
+                salvar_parametros(pilha); 
+                printf("\n    call %s\n", nomefuncao);
+                recuperar_parametros(pilha); 
+
+                continue;
             }
         }
     }
