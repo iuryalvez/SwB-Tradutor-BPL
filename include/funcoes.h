@@ -69,14 +69,16 @@ void inicializar_pilha(Pilha *pilha);
  * 
  * @param pilha carrega todas as variáveis importantes da função
  */
-void armazenar_pilha(Pilha pilha);
+void armazenar_pilha(Pilha *pilha);
+
+void print_armazenamento(Pilha pilha);
 
 /**
  * @brief exibe a recuperação das variáveis locais de pilha
  * 
  * @param pilha carrega todas as variáveis importantes da função
  */
-void recuperar_pilha(Pilha pilha);
+void print_recuperacao(Pilha pilha);
 
 /**
  * @brief alinha o tamanho de acordo com o alinhamento

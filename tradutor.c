@@ -61,49 +61,26 @@ int main() {
                 bloco_def = false;   // finaliza a definição de variáveis
                 bloco_funcao = true; // permite o início do corpo da função
 
-                // armazenando a posição na pilha das variáveis de declaração de função 
-                for (int i = 0; i < pilha.param_qtd; i++) {
-                    if (pilha.param[i].tipo == 'i') { // se for do tipo inteiro
-                        pilha.rsp += 4; // não precisa alinhar porque 4 é múltiplo de 4, 8, 16
-                        pilha.param[i].pos = pilha.rsp; // guarda a posição na pilha
-                    } else {
-                        alinhar(&(pilha.rsp), 8);  // precisa alinhar para 8 (ponteiro) pq não sabemos se está alinhado
-                        pilha.rsp += 8;      // desce o topo da pilha para colocar mais uma variável
-                        pilha.param[i].pos = pilha.rsp; // guarda a posição na pilha
-                    }
-                }
+                armazenar_pilha(&pilha);
 
-                alinhar(&(pilha.rsp), 16);
-                
-                printf("\n    # armazenar todas as variáveis (inclusive os registradores de parametros)\n");
-                printf("    subq    $%d, %%rsp\n", pilha.rsp);
-
-                armazenar_pilha(pilha);
+                print_armazenamento(pilha);
                 
                 continue;
             }
 
             // lendo as variáveis locais e registrando suas posições na pilha
-            if (sscanf(linha, "reg vr%d", &pilha.reg[pilha.reg_qtd].ind) == 1 && indice_funcao != 1) {
-                alinhar(&(pilha.rsp), 8);
-                pilha.rsp += 8;
-                pilha.reg[pilha.reg_qtd].pos = pilha.rsp;
-                pilha.reg_qtd++;
-                continue;
-            }
             if (sscanf(linha, "var vi%d", &pilha.var[pilha.var_qtd].ind) == 1) {
-                pilha.rsp += 4;
-                pilha.var[pilha.var_qtd].pos = pilha.rsp;
                 pilha.var_qtd++;
                 continue;
             }
             if (sscanf(linha, "vet va%d size ci%d", &pilha.vet[pilha.vet_qtd].ind, &pilha.vet[pilha.vet_qtd].size) == 2) {
-                alinhar(&(pilha.rsp), 8);
-                pilha.rsp += 8 * pilha.vet[pilha.vet_qtd].size;
-                pilha.vet[pilha.vet_qtd].pos = pilha.rsp;
                 pilha.vet_qtd++;
                 continue;
             }        
+            if (sscanf(linha, "reg vr%d", &pilha.reg[pilha.reg_qtd].ind) == 1 && indice_funcao != 1) {
+                pilha.reg_qtd++;
+                continue;
+            }
         }
 
         if (bloco_funcao) {
@@ -111,7 +88,7 @@ int main() {
             // código do corpo da função aqui (cálculos, chamadas de outras funções, etc)
             if (strncmp(linha, "end", 3) == 0) { // verifica se a linha é uma finalização de função
                 
-                recuperar_pilha(pilha);
+                print_recuperacao(pilha);
 
                 // código da finalização de função aqui (recuperação de v)
                 printf("\n    leave\n");
