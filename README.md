@@ -2,10 +2,7 @@
 Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
 ## Tasks de desenvolvimento (temporário)
-- [ ] Implementar o assembly do armazenamento de variáveis inteiras na pilha
-- [ ] Implementar o assembly do armazenamento de arrays na pilha 
 - [ ] Implementar o assembly da atribuição de registradores
-- [ ] Implementar a regra e assembly para chamada de funções (call)
 
 ### Rafael
 - [x] Implementar o assembly de início da chamada das funções
@@ -13,10 +10,13 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 
 ### Iury
 - [x] Implementar regra para diferenciar tipos de variáveis locais (var, vet e reg)
-- [x] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call) - incompleto
+- [x] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call)
+- [x] Implementar o assembly do armazenamento de variáveis inteiras na pilha
+- [x] Implementar o assembly do armazenamento de arrays na pilha 
 
 ### Vinicius
-- [x] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call) - incompleto
+- [x] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call)
+- [ ] Implementar a regra e assembly para chamada de funções (call)
 
 ## Introdução
 O trabalho propõe a criação de um tradutor de BPL para Assembly AMD64. O enunciado do projeto está na pasta "especificacoes" que contém 2 pdf's das versões do trabalho.

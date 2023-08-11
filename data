@@ -1,22 +1,10 @@
 function f1 pa1 pi2 pa3
 def
-vet va1 size ci10
-vet va2 size ci20
+var vi1
+var vi2
 var vi3
 reg vr4
-var vi5
-reg vr6
 enddef
 blabla
-call juvenal
-end
-
-function f2 pi1
-def
-var vi1
-reg vr2
-var vi3
-enddef
-blabla
-call
+call f2 vi5 va2
 end

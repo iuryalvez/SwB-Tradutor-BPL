@@ -1,168 +1,134 @@
 #include "../include/funcoes.h"
- 
-void salvar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]) {
-    int i; // variável de iteração
-    int ind_param = 5; // índice de parâmetro
 
-    alinhar_tampilha(tampilha, 8);
-
-    printf("\n    # %d parametro(s) a ser(em) salvo(s)\n", nro_param-1);
-    printf("    subq $%d, %%rsp\n", (nro_param-1) * 8);
-    for (i = 0; i < nro_param-1; i++) {
-        *tampilha += 8;
-        printf("    # salvando %dº parametro na pilha\n", i+1);
-        printf("    movq    %%%s, -%d(%%rbp)\n", r[ind_param].nome64, *tampilha);
-        ind_param--;
-    }
+void inicializar_param(Param *param) {
+    param->qtd = 0;
+    param->tipo[0] = '\0';
+    param->tipo[1] = '\0';
+    param->tipo[2] = '\0';
+    param->subq = 0;
 }
 
-void recuperar_parametros(int nro_param, int *tampilha, Registrador r[MAX_REG]) {
+void salvar_parametros(Param *param, int *rsp) {
     
-    int i; // variável de iteração
-    int ind_param = 7-nro_param; // índice de parâmetro
-
-    printf("\n    # %d parametro(s) a ser(em) recuperado(s)\n", nro_param-1);
-    for (i = nro_param-1; i > 0; i--) {
-        printf("    # recuperando %dº parametro na pilha\n", i);
-        printf("    movq    -%d(%%rbp), %%%s\n", *tampilha, r[ind_param].nome64);
-        *tampilha -= 8;
-        ind_param++;
-    }
-    
-    printf("    addq    $%d, %%rsp\n", (nro_param-1) * 8);
-    
-}
-
-void iniciar_vlp(vl vlp[8]) {
-    for (int i = 0; i < 8; i++) {
-        vlp[i].indice = -1;
-    }
-}
-
-void armazenar_vlp(vl vlp[8], int qtd_vlp, int tampilha) {
     int i;
-    printf("    subq    $%d, %%rsp\n", tampilha);
-    for (i = 0; i < qtd_vlp; i++, tampilha -= vlp[i].pos_pilha) { 
-        if ((vlp[i].pos_pilha-1) % 8 == 7) printf("    movq    $0, -%d(%%rbp)\n", vlp[i].pos_pilha);
-        else printf("    movl    $0, -%d(%%rbp)\n", vlp[i].pos_pilha);
-    }
-}
+    int rsp0 = *rsp;  // salvando meu rsp original para poder descobrir o subq 
+    int ind_rdi = 5; // índice do rdi
 
-void armazenar_vr(int ind_reg[4], int qtd_reg, Registrador r[MAX_REG]) {
-    int i;
-    int ind;
-    printf("\n");
-    for (i = 0, ind = 8; i < qtd_reg; i++, ind++) {
-        printf("    # vr%d = 0\n", ind_reg[i]); // comentário de linha
-        printf("    movq    $0, %%%s\n\n", r[ind].nome64); // rcx
-    }
-
-}
-
-void alinhar_tampilha(int *tampilha, int alinhamento) {
-    while (*tampilha % alinhamento != 0) {
-        *tampilha += 4;
-    }
-}
-
-void reinicializa_parametros(int *indice_funcao,int *nro_param, char * tipo_param, int *tampilha, vl * vlp, int * ind_reg, int * cont_reg, int * cont_vlp){
-    int i;
-    // variáveis de declaração de função
-    *indice_funcao = 0;     // índice da função
-    *nro_param = 0;         // número de parâmetros da função
-    tipo_param[0] = 0;
-    tipo_param[1] = 0;
-    tipo_param[2] = 0;
-
-    // variáveis de controle e contagem da pilha
-    *tampilha = 0; // tamanho da pilha da função
-
-    // variáveis de controle da pilha
-    for(i=0;i<8;i++){
-        vlp[i].indice = 0;
-        vlp[i].pos_pilha = 0;
-        vlp[i].size = 0;
-    }
-    ind_reg[0] = 0;   // índice dos registradores
-    ind_reg[1] = 0;
-    ind_reg[2] = 0;
-    ind_reg[3] = 0;
-    *cont_reg = 0; // contador de registradores
-    *cont_vlp = 0; // contador de variaveis locais de pilha
-}
-
-void printacontrole(int indice_funcao, int nro_param, char * tipo_param, int tampilha, vl * vlp, int * ind_reg, int cont_reg, int cont_vlp){
-    int i;
-
-    printf("indice funcao = %d\n", indice_funcao);
-    printf("nro param = %d\n", nro_param);
-    printf("tipo_param[0] = %d\n", tipo_param[0]);
-    printf("tipo_param[1] = %d\n", tipo_param[1]);
-    printf("tipo_param[2] = %d\n", tipo_param[2]);
-    printf("tam pilha = %d\n", tampilha);
-
-    for(i=0;i<8;i++){
-        printf("vlp indice na posicao %d: %d\n", i, vlp[i].indice);
-        printf("vlp pos_pilha na posicao %d: %d\n", i, vlp[i].pos_pilha);
-        printf("vlp size na posicao %d: %d\n", i, vlp[i].size);
-    }
-
-    printf("ind_reg[0] = %d\n", ind_reg[0]);
-    printf("ind_reg[1] = %d\n", ind_reg[1]);
-    printf("ind_reg[2] = %d\n", ind_reg[2]);
-    printf("ind_reg[3] = %d\n", ind_reg[3]);
-
-    printf("cont_reg = %d\n", cont_reg);
-    printf("cont_vlp = %d\n", cont_vlp);
-}
-
-// do 8 ao 11
-void recuperar_reg(Registrador *r, int * tampilha, int * salvos){
-    int i = salvos[4]-1;
-    for(; i>0 ; i--){
-        printf("    # recuperando r%d parametro na pilha\n", salvos[i]);
-        printf("    movq    -%d(%%rbp), r%d\n",*tampilha, salvos[i]);
-        *tampilha -= 8;
-    }
-    inicializasalvos(salvos);
-}
-
-void salvar_reg(Registrador *r, int * tampilha, int * salvos){
-    int i;
-    int cont = 0;
+    Registrador r[MAX_REG];
+    iniciar_registradores(r);
     
-
-    for(i = 8; i <= 11 ; i++){
-        
-        if((r[i]. livre) == false) cont++;
-        
-    }
-    
-    printf("    subq $%d, %%rsp", multiplode16(cont*8));
-    
-    for(i = 8; i <= 11 ; i++){
-        
-        if(!(r[i]. livre)){
-            *tampilha += 8;
-            printf("    # salvando r%d parametro na pilha\n", i);
-            printf("    movq    r%d, -%d(%%rbp)\n", i, *tampilha);
-            salvos[salvos[4]] = i;
-            salvos[4]++;
+    for (i = 0; i < param->qtd; i++) {
+        if (param->tipo[i] == 'i') { // se for do tipo inteiro
+            *rsp += 4; // não precisa alinhar porque 4 é múltiplo de 4, 8, 16
+            param->pos[i] = *rsp; // guarda a posição na pilha
+        } else {
+            alinhar_rsp(rsp, 8); // precisa alinhar para 8 (ponteiro) pq não sabemos se está alinhado
+            *rsp += 8; // desce o topo da pilha para colocar mais uma variável
+            param->pos[i] = *rsp; // guarda a posição na pilha
         }
-        
+    }
+
+    param->subq = *rsp - rsp0; // rsp é negativo, rsp0 é negativo, rsp0 - rsp vai resultar num número positivo (pq rsp é maior que rsp0)
+    alinhar_rsp(&(param->subq), 16);
+
+    printf("\n    subq    $%d, %%rsp\n", param->subq); 
+
+    // printf do assembly de armazenamento, vai utilizar as informações que acabamos de obter
+    printf("\n    # %d parametro(s) a ser(em) salvo(s)\n", param->qtd); 
+    for (i = 0; i < param->qtd; i++) {
+        printf("\n    # salvando %dº parametro na pilha\n", i+1);
+        if (param->tipo[i] == 'i') printf("    movl    %%%s, -%d(%%rbp)\n", r[ind_rdi-i].nome32, param->pos[i]);
+        else printf("    movq    %%%s, -%d(%%rbp)\n", r[ind_rdi-i].nome64, param->pos[i]);
     }
 }
 
-// Se receber um int multiplo de 8, retorna o multiplo de 16 mais proximo, acima dele. Se receber multiplo de 16, apenas retorna ele msm.
-int multiplode16(int x){
-    while((x%16) != 0) x += 16;
-    return x;
-}
-
-void inicializasalvos(int * salvos){
+void recuperar_parametros(Param *param, int *rsp) {
     int i;
-    for(i=0;i<4; i++){
-        salvos[i] = -1;
+    int ind_ultimo = 6 - param->qtd; // índice do último registrador 
+    
+    Registrador r[MAX_REG];
+    iniciar_registradores(r);
+
+    printf("\n    # %d parametro(s) a ser(em) recuperado(s)\n", param->qtd);
+    for (i = param->qtd-1; i >= 0; i--) {
+        printf("\n    # recuperando %dº parametro na pilha\n", i+1);
+        if (param->tipo[i] == 'i') printf("    movl    -%d(%%rbp), %%%s\n", param->pos[i], r[ind_ultimo].nome32);
+        else printf("    movq    -%d(%%rbp), %%%s\n", param->pos[i], r[ind_ultimo].nome64);
+        ind_ultimo++;
     }
-    salvos[4] = 0; // a posição 5 é a que armazena o indice da menor posição -1 do vetor;
+    
+    printf("\n    addq    $%d, %%rsp\n", param->subq);
+    *rsp -= param->subq;
+    
+}
+
+void inicializar_vl(VL *vl) {
+    int i;
+    
+    vl->var_qtd = 0;
+    vl->reg_qtd = 0;
+    vl->vet_qtd = 0;
+
+    for (i = 0; i < 4; i++) {
+        vl->var[i].ind = 0;
+        vl->var[i].pos = 0;
+        
+        vl->vet[i].ind = 0;
+        vl->vet[i].pos = 0;
+
+        vl->reg[i].ind = 0;
+        vl->reg[i].pos = 0;
+    }
+} 
+
+void armazenar_vl(VL *vl) {
+    int i; 
+    Registrador r[MAX_REG];
+    iniciar_registradores(r);
+    // armazenar variáveis locais do tipo var
+    if (vl->var_qtd) {
+        for (i = 0; i < vl->var_qtd; i++) {
+            printf("\n    # vi%d = 0\n", vl->var[i].ind);
+            printf("    movl    $0, %d(%%rbp)\n", vl->var[i].pos);
+        }
+    }
+
+    // armazenar variáveis locais do tipo vet
+    if (vl->vet_qtd) {
+        for (i = 0; i < vl->vet_qtd; i++) {
+            printf("\n    # salvando endereco inicial do va%d\n", vl->vet[i].ind);
+            printf("    movq    $0, -%d(%%rbp)\n", vl->vet[i].pos);
+        }
+    }
+
+    // armazenar variáveis locais do tipo reg 
+    // só irá armazenar a partir da segunda função
+    // só irá armazenar os reg que a função utilizar (definidos no def enddef)
+    if (vl->reg_qtd) {
+        for (i = 0; i < vl->reg_qtd; i++) {
+            printf("\n    # vr%d -> %%%s\n", vl->reg[i].ind, r[i+8].nome64);
+            printf("    movq    %%%s, -%d(%%rbp)\n", r[i+8].nome64, vl->reg[i].pos);
+        }
+    }
+}
+
+void recuperar_vl(VL vl) {
+    // recuperar variáveis locais do tipo reg 
+    // só irá recuperar a partir da segunda função
+    // só irá recuperar os reg que a função utilizar (definidos no def enddef)
+    Registrador r[MAX_REG];
+    iniciar_registradores(r);
+    int i;
+    if (vl.reg_qtd) {
+        for (i = vl.reg_qtd-1; i >= 0; i--) {
+            printf("    # devolvendo o valor do %%%s anterior\n", r[i+8].nome64);
+            printf("    movq    -%d(%%rbp), %%%s\n", vl.reg[i].pos, r[i+8].nome64);
+        }
+    }
+}
+
+void alinhar_rsp(int *rsp, int alinhamento) {
+    while (*rsp % alinhamento != 0) {
+        *rsp += 4;
+    }
 }
