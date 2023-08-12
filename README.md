@@ -4,7 +4,6 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 ## Tasks de desenvolvimento (temporário)
 - [ ] Implementar o assembly da atribuição de registradores;
 - [ ] Implementar o assembly de condicional;
-- [ ] Implementar o assembly de retorno das funções.
 
 ### Rafael
 - [x] Implementar o assembly de início da chamada das funções;
@@ -19,7 +18,9 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 
 ### Vinicius
 - [x] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call);
-- [ ] Implementar a regra e assembly para chamada de funções (call).
+- [x] Implementar a regra e assembly para chamada de funções (call).
+- [x] Implementar o assembly de retorno das funções.
+- [ ] Implementar a atribuição de parametros em caso de call.
 
 ## Introdução
 O trabalho propõe a criação de um tradutor de BPL para Assembly AMD64. O enunciado do projeto está na pasta "especificacoes" que contém 2 pdf's das versões do trabalho.
