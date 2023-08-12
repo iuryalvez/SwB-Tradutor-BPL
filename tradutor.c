@@ -10,10 +10,17 @@ int main() {
 
     Pilha pilha; 
 
+    Registrador r[MAX_REG];
+    iniciar_registradores(r);
+
     // variáveis de declaração de função
     int indice_funcao = 0; // índice da função
     char nomefuncao[5]; // f9999 (5 letras)
-    
+
+    // variáveis de acesso à vetores
+    int arr;  // array
+    int ind;  // índice
+    int dest; // destino
 
     // flags de controle
     bool bloco_declaracao = true; // flag do bloco de declaração da função
@@ -99,12 +106,55 @@ int main() {
                 
                 continue;
             }
+
+            if (strncmp(linha, "get", 3) == 0) {
+                if (strncmp(linha, "get pa", 6) == 0) {
+                    if (sscanf(linha, "get pa%d index ci%d to pi%d", &arr, &ind, &dest) == 3) {
+                        
+                        printf("\n    # pi%d = pa%d[%d]\n", dest, arr, ind);
+                        printf("    movq    $%d, %%r8\n", ind);
+                        printf("    imulq   $4, %%r8\n");
+                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.param[arr-1].pos);
+                        printf("    addq    %%r9, %%r8\n");
+                        printf("    movl    (%%r8), %%r10\n");
+                        printf("    movl    %%r10d, -%d(%%rbp)\n", pilha.param[dest].pos);
+
+                    } 
+                    else if (sscanf(linha, "get pa%d index ci%d to vi%d", &arr, &ind, &dest) == 3) {
+                        
+
+
+                    } 
+                    else if (sscanf(linha, "get pa%d index ci%d to vr%d", &arr, &ind, &dest) == 3) {
+                        
+
+
+                    }
+                }
+                else {
+                    if (sscanf(linha, "get va%d index ci%d to pi%d", &arr, &ind, &dest) == 3) {
+
+                    } 
+                    else if (sscanf(linha, "get va%d index ci%d to vi%d", &arr, &ind, &dest) == 3) {
+
+                    } 
+                    else if (sscanf(linha, "get va%d index ci%d, to vr%d", &arr, &ind, &dest) == 3) {
+
+                    }
+                }
+
+                continue;
+            }
+            
+            if (strncmp(linha, "set", 3) == 0) {
+
+                continue;
+            }
+
             if (strncmp(linha, "call", 3) == 0) { // verifica se a linha é uma chamada de função
                 sscanf(linha, "call %s", nomefuncao);
 
-                salvar_parametros(pilha); 
                 printf("\n    call %s\n", nomefuncao);
-                recuperar_parametros(pilha); 
 
                 continue;
             }
