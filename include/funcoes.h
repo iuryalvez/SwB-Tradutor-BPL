@@ -72,12 +72,17 @@ void recuperar_parametros(Pilha pilha);
 void inicializar_pilha(Pilha *pilha);
 
 /**
- * @brief exibe o salvamento das variáveis locais de pilha
+ * @brief salva as variáveis locais de pilha
  * 
  * @param pilha carrega todas as variáveis importantes da função
  */
 void armazenar_pilha(Pilha *pilha);
 
+/**
+ * @brief exibe o salvamento das variáveis locais de pilha
+ * 
+ * @param pilha carrega todas as variáveis importantes da função
+ */
 void print_armazenamento(Pilha pilha);
 
 /**
