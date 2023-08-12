@@ -34,22 +34,6 @@ void armazenar_pilha(Pilha *pilha) {
     iniciar_registradores(r);
     
     printf("\n    # pilha:\n");
-
-    // armazenando a posição na pilha das variáveis de declaração de função 
-    if (pilha->param_qtd) {
-        for (int i = 0; i < pilha->param_qtd; i++) {
-            if (pilha->param[i].tipo == 'i') { // se for do tipo inteiro
-                pilha->rsp += 4; // não precisa alinhar porque 4 é múltiplo de 4, 8, 16
-                pilha->param[i].pos = pilha->rsp; // guarda a posição na pilha
-                printf("    # pi%d: -%d\n", i+1, pilha->param[i].pos);
-            } else {
-                alinhar(&(pilha->rsp), 8); // precisa alinhar para 8 (ponteiro) pq não sabemos se está alinhado
-                pilha->rsp += 8; // desce o topo da pilha para colocar mais uma variável
-                pilha->param[i].pos = pilha->rsp; // guarda a posição na pilha
-                printf("    # pa%d: -%d\n", i+1, pilha->param[i].pos);
-            }
-        }
-    }
     
     // armazenar variáveis locais do tipo var
     if (pilha->var_qtd) {
@@ -81,6 +65,23 @@ void armazenar_pilha(Pilha *pilha) {
             printf("    # vr%d: -%d\n", pilha->reg[i].ind, pilha->reg[i].pos);
         }
     }
+
+    // armazenando a posição na pilha das variáveis de declaração de função 
+    if (pilha->param_qtd) {
+        for (int i = 0; i < pilha->param_qtd; i++) {
+            if (pilha->param[i].tipo == 'i') { // se for do tipo inteiro
+                pilha->rsp += 4; // não precisa alinhar porque 4 é múltiplo de 4, 8, 16
+                pilha->param[i].pos = pilha->rsp; // guarda a posição na pilha
+                printf("    # pi%d: -%d\n", i+1, pilha->param[i].pos);
+            } else {
+                alinhar(&(pilha->rsp), 8); // precisa alinhar para 8 (ponteiro) pq não sabemos se está alinhado
+                pilha->rsp += 8; // desce o topo da pilha para colocar mais uma variável
+                pilha->param[i].pos = pilha->rsp; // guarda a posição na pilha
+                printf("    # pa%d: -%d\n", i+1, pilha->param[i].pos);
+            }
+        }
+    }
+
     alinhar(&(pilha->rsp), 16);
 }
 

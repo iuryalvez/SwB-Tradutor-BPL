@@ -18,7 +18,7 @@ int main() {
     iniciar_registradores(r);
 
     Typecharint parameters[4];
-    inicializar_parameters(parameters); // parameters[0].type = 'v' e o reto zera tudo.
+    inicializar_parameters(parameters); // parameters[0].type = 'v' e o resto zera tudo.
 
     // variáveis de declaração de função
     int indice_funcao = 0; // índice da função
@@ -47,11 +47,6 @@ int main() {
                 pilha.param_qtd = sscanf(linha, "function f%d p%c1 p%c2 p%c3", &indice_funcao, &pilha.param[0].tipo, &pilha.param[1].tipo, &pilha.param[2].tipo);
                 
                 --pilha.param_qtd; // atualizando a quantidade de parâmetros que o sscanf retornou para armazenar de fato a qtd de parâmetros
-
-                if (pilha.param_qtd == -1 || pilha.param_qtd > 3) {
-                    printf("Tem algo de errado na declaracao da funcao.\n");
-                    return 0;
-                }
 
                 printf(".globl f%d\n", indice_funcao);
                 printf("f%d:\n", indice_funcao);
@@ -91,7 +86,7 @@ int main() {
                 pilha.vet_qtd++;
                 continue;
             }        
-            if (sscanf(linha, "reg vr%d", &pilha.reg[pilha.reg_qtd].ind) == 1 && indice_funcao != 1) {
+            if (sscanf(linha, "reg vr%d", &pilha.reg[pilha.reg_qtd].ind) == 1) {
                 pilha.reg_qtd++;
                 continue;
             }
@@ -115,40 +110,33 @@ int main() {
             }
 
             if (strncmp(linha, "get", 3) == 0) {
-                if (strncmp(linha, "get pa", 6) == 0) {
-                    if (sscanf(linha, "get pa%d index ci%d to pi%d", &arr, &ind, &dest) == 3) {
-                        
-                        printf("\n    # pi%d = pa%d[%d]\n", dest, arr, ind);
-                        printf("    movq    $%d, %%r8\n", ind);
-                        printf("    imulq   $4, %%r8\n");
-                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.param[arr-1].pos);
-                        printf("    addq    %%r9, %%r8\n");
-                        printf("    movl    (%%r8), %%r10\n");
-                        printf("    movl    %%r10d, -%d(%%rbp)\n", pilha.param[dest].pos);
+                // sscanf(line, "get %ca%d index ci%d %*s %ci%d", 
+                // &_1_operand_type,
+                // &_1_operand_index,
+                // &vet_size,
+                // &_2_operand_type,
+                // &_2_operand_index);
+            
 
-                    } 
-                    else if (sscanf(linha, "get pa%d index ci%d to vi%d", &arr, &ind, &dest) == 3) {
-                        
+                // printf("\n    movq    $%d, %%r10\n", vet_size);
+                // printf("    imulq   $4, %%r10\n");
 
+                // if(_1_operand_type == 'v'){
+                    // printf("    leaq    -%d(%%rbp), %%r9\n", var_stack[_1_operand_index-1]);
+                // }
+                // if(_1_operand_type == 'p'){
+                    // printf("    movq    -%d(%%rbp), %%r9\n", para_stack[_1_operand_index-1]);
+                // }
+                
+                // printf("    addq    %%r9, %%r10\n");
+                // printf("    movl    (%%r10), %%r8d\n");
 
-                    } 
-                    else if (sscanf(linha, "get pa%d index ci%d to vr%d", &arr, &ind, &dest) == 3) {
-                        
-
-
-                    }
-                }
-                else {
-                    if (sscanf(linha, "get va%d index ci%d to pi%d", &arr, &ind, &dest) == 3) {
-
-                    } 
-                    else if (sscanf(linha, "get va%d index ci%d to vi%d", &arr, &ind, &dest) == 3) {
-
-                    } 
-                    else if (sscanf(linha, "get va%d index ci%d, to vr%d", &arr, &ind, &dest) == 3) {
-
-                    }
-                }
+                // if(_2_operand_type == 'v'){
+                    // printf("    movl    %%r8d, -%d(%%rbp)\n", var_stack[_2_operand_index-1]);
+                // }
+                // if(_2_operand_type == 'p'){
+                    // printf("    movl    %%r8d, -%d(%%rbp)\n", para_stack[_2_operand_index-1]);
+                // }
 
                 continue;
             }
@@ -211,7 +199,7 @@ int main() {
                         if(pilha.reg[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.reg[i].pos,parameters[0].type,parameters[0].index);
                     }
                }
-               else{
+               else {
                     for(i=0 ; i<pilha.var_qtd ; i++){
                         if(pilha.var[i].ind == parameters[0].index) printf("\n    movl      %%eax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.var[i].pos,parameters[0].type,parameters[0].index);
                     }
@@ -224,6 +212,6 @@ int main() {
             }
         }
     }
-
     return 0;
 }
+
