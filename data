@@ -1,11 +1,12 @@
-function f1 pa1 pi2 pa3
+function f1 pa1 pa2 pa3
 def
 var vi1
 var vi2
 var vi3
-reg vr4
+vet va4 size ci150
+reg vr5
 enddef
-call f2 vi5 va2
+vr4 = call f2 vi3 va2 pa1
 end
 
 function f2 pa1 pi2 pi3

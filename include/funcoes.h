@@ -24,6 +24,13 @@ typedef struct reg {
     int pos; // posição na pilha da variável
 } Reg;
 
+typedef struct typecharint {
+    char x; // Char que define se é constante, parametro ou var;
+    char type; // Char que armazena o tipo da variavel;
+    int  index; // Indice da variavel;
+} Typecharint;
+
+
 // representa um parâmetro da declaração de função
 typedef struct param {
     char tipo;
@@ -87,5 +94,17 @@ void print_recuperacao(Pilha pilha);
  * @param alinhamento múltiplo de alinhamento
  */
 void alinhar(int *tamanho, int alinhamento);
+
+/**
+ * @brief Inicializa as informações dos parametros para call.
+ * 
+ * @param p Passa as informações dos parametros que irao ser atribuidos no call.
+*/
+void inicializar_parameters(Typecharint * p);
+
+
+void callfuncao(char * s);
+
+void salva_parametros(Pilha pilha);
 
 #endif
