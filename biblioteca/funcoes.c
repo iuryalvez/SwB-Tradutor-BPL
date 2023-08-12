@@ -28,7 +28,6 @@ void inicializar_pilha(Pilha *pilha) {
 
 void armazenar_pilha(Pilha *pilha) {
     int i;
-    int ind = 5;
 
     Registrador r[MAX_REG];
     iniciar_registradores(r);
@@ -59,8 +58,7 @@ void armazenar_pilha(Pilha *pilha) {
     // só irá armazenar os reg que a função utilizar (definidos no def enddef)
     if (pilha->reg_qtd) {
         for (i = 0; i < pilha->reg_qtd; i++) {
-            alinhar(&(pilha->rsp), 8);
-            pilha->rsp += 8;
+            pilha->rsp += 4;
             pilha->reg[i].pos = pilha->rsp;
             printf("    # vr%d: -%d\n", pilha->reg[i].ind, pilha->reg[i].pos);
         }
@@ -122,6 +120,7 @@ void print_armazenamento(Pilha pilha) {
 }
 
 void print_recuperacao(Pilha pilha) {
+    
     // recuperar variáveis locais do tipo reg 
     // só irá recuperar a partir da segunda função
     // só irá recuperar os reg que a função utilizar (definidos no def enddef)
