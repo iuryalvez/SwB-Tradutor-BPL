@@ -164,23 +164,24 @@ int main() {
 
                switch(callss){
                     case 3:
-
+                        // atribui_call(pilha, parameters, 3);
                         callfuncao(nomefuncao);
 
                         break;
                     case 6:
-
+                        // atribui_call(pilha, parameters, 3);
                         callfuncao(nomefuncao);
 
                         break;
                     case 9:
-
+                        // atribui_call(pilha, parameters, 3);
                         callfuncao(nomefuncao);
 
                         break;
                     case 12:
-
+                        // atribui_call(pilha, parameters, 3);
                         callfuncao(nomefuncao);
+
                         break;
                     default:
                         break;
