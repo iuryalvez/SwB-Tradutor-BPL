@@ -93,14 +93,6 @@ void print_armazenamento(Pilha pilha) {
     printf("\n    # armazenar todas as variáveis\n");
     printf("    subq    $%d, %%rsp\n", pilha.rsp);
 
-    if (pilha.param_qtd) {
-        for (i = 0; i < pilha.param_qtd; i++) {
-            printf("\n    # salvando %dº parametro na pilha\n", i+1);
-            if (pilha.param[i].tipo == 'i') printf("    movl    %%%s, -%d(%%rbp)\n", r[5-i].nome32, pilha.param[i].pos);
-            else printf("    movq    %%%s, -%d(%%rbp)\n", r[5-i].nome64, pilha.param[i].pos);
-        }
-    }
-
     // armazenar variáveis locais do tipo var
     if (pilha.var_qtd) {
         for (i = 0; i < pilha.var_qtd; i++) {
@@ -176,4 +168,24 @@ void alinhar(int *tamanho, int alinhamento) {
     while (*tamanho % alinhamento != 0) {
         *tamanho += 4;
     }
+}
+
+void inicializar_parameters(Typecharint * p){
+    int i;
+
+    //printf("\n\n==================================================================================================\n\n");
+    for(i=0; i<4 ; i++){
+        p[i].index = 0;
+        p[i].type = 0;
+        p[i].x = 0;
+
+        if(i==0) p[i].x = 'v';
+       // printf("Index = %d, Type = %c, X = %c.\n", p[i].index, p[i].type, p[i].x);
+    }
+    //printf("\n\n==================================================================================================\n\n");
+
+}
+
+void callfuncao(char * s){
+    printf("\n    call %s\n", s);
 }

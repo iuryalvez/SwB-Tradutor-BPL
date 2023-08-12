@@ -6,12 +6,19 @@ int main() {
     printf(".data\n\n");
     printf(".text\n\n");
 
+    int i;
+
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
 
     Pilha pilha; 
 
+    int callss; // Conta os parametros do sscanf da função call;
+
     Registrador r[MAX_REG];
     iniciar_registradores(r);
+
+    Typecharint parameters[4];
+    inicializar_parameters(parameters); // parameters[0].type = 'v' e o reto zera tudo.
 
     // variáveis de declaração de função
     int indice_funcao = 0; // índice da função
@@ -151,10 +158,66 @@ int main() {
                 continue;
             }
 
-            if (strncmp(linha, "call", 3) == 0) { // verifica se a linha é uma chamada de função
-                sscanf(linha, "call %s", nomefuncao);
+            if ((linha[0] == 'v') & (linha[4] == '=')  & (linha[6] == 'c')  & (linha[7] == 'a')  & (linha[8] == 'l')  & (linha[9] == 'l') ) { // verifica se a linha é uma chamada de função
+                callss = sscanf(linha, "v%c%d = call %s %c%c%d %c%c%d %c%c%d", &parameters[0].type, &parameters[0].index, nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
+                // 12 parametros a serem lidos, 0 var = 3, 1 var = 6, 2 var = 9, 3 var = 12.
 
-                printf("\n    call %s\n", nomefuncao);
+              /*
+                    printf("\n\n==================================================================================================\n\n");
+                    printf("\n\nCallss = %d\n\n", callss);
+                    for(int i=0; i<4 ; i++){
+                        printf("Index = %d, Type = %c, X = %c.\n", parameters[i].index, parameters[i].type, parameters[i].x);
+                    }
+                    printf("\n\n==================================================================================================\n\n");
+              
+              */
+
+               salvar_parametros(pilha);
+
+               switch(callss){
+                    case 3:
+
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 6:
+
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 9:
+
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 12:
+
+                        callfuncao(nomefuncao);
+                        break;
+                    default:
+                        break;
+               }       
+
+               printf("\n\n\nType = %c\n\n\n", parameters[0].type);
+
+               if( parameters[0].type == 'a' ){
+                    for(i=0 ; i<pilha.vet_qtd ; i++){
+                        if(pilha.vet[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.vet[i].pos,parameters[0].type,parameters[0].index);
+                    }
+               }
+               else if( parameters[0].type == 'r' ){
+                    for(i=0 ; i<pilha.reg_qtd ; i++){
+                        if(pilha.reg[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.reg[i].pos,parameters[0].type,parameters[0].index);
+                    }
+               }
+               else{
+                    for(i=0 ; i<pilha.var_qtd ; i++){
+                        if(pilha.var[i].ind == parameters[0].index) printf("\n    movl      %%eax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.var[i].pos,parameters[0].type,parameters[0].index);
+                    }
+               }
+
+                recuperar_parametros(pilha);
+                inicializar_parameters(parameters);
 
                 continue;
             }
