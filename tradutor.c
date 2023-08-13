@@ -301,12 +301,15 @@ int main() {
                 else printf("    jl end_if0%d", if_cont);
                 
                 printf(" # if !(%c%c%d %c%c %c%c%d) goto end_if0%d\n", exp.tipo1[0], exp.tipo1[1], exp.ind1, oprel[0], oprel[1], exp.tipo2[0], exp.tipo2[1], exp.ind2, if_cont);
-
+                
+                continue;
             }
 
             if (strncmp(linha, "endif", 5) == 0) {
                 bloco_if = true;
                 printf("\n    end_if0%d:\n", if_cont);
+                
+                continue;
             }
         }
     }
