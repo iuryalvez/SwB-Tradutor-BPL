@@ -32,6 +32,22 @@ set pa1 index ci5 with vr4
 set va1 index ci1 with pi2
 set va2 index ci4 with vi3
 set va1 index ci0 with vr4
+if ci10 le ci10
+endif
+if ci10 le pi2
+endif
+if ci10 le vi3
+endif
+if ci10 le vr6
+endif
+if ci10 gt ci10
+endif
+if ci10 gt pi2
+endif
+if ci10 gt vi3
+endif
+if ci10 gt vr6
+endif
 end
 
 function f3 pi1

@@ -30,6 +30,12 @@ typedef struct typecharint {
     int  index; // Indice da variavel;
 } Typecharint;
 
+typedef struct exp {
+    char tipo1[2];
+    char tipo2[2];
+    int ind1;
+    int ind2;
+} Exp;
 
 // representa um parâmetro da declaração de função
 typedef struct param {
@@ -127,5 +133,11 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
 void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, char ** registers_param);
 
 int pegapos(Typecharint parameters, Pilha pilha, int * x);
+=======
+int encontrar_indvet(Pilha pilha, int ind);
+
+int encontrar_indvar(Pilha pilha, int ind);
+
+int encontrar_indreg(Pilha pilha, int ind);
 
 #endif
