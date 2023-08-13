@@ -6,6 +6,8 @@ int main() {
     printf(".data\n\n");
     printf(".text\n\n");
 
+    char operator;
+
     char *registers_param[] = {"di", "si", "dx"};
 
     int i;
@@ -196,21 +198,10 @@ int main() {
 
             if ((linha[0] == 'v') & (linha[4] == '=')  & (linha[6] == 'c')  & (linha[7] == 'a')  & (linha[8] == 'l')  & (linha[9] == 'l') || (linha[0] == 'v') & (linha[5] == '=')  & (linha[7] == 'c')  & (linha[8] == 'a')  & (linha[9] == 'l')  & (linha[10] == 'l')) { // verifica se a linha é uma chamada de função
                 callss = sscanf(linha, "v%c%d = call %s %c%c%d %c%c%d %c%c%d", &parameters[0].type, &parameters[0].index, nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
-                // 12 parametros a serem lidos, 0 var = 3, 1 var = 6, 2 var = 9, 3 var = 12.
 
-              /*
-                    printf("\n\n==================================================================================================\n\n");
-                    printf("\n\nCallss = %d\n\n", callss);
-                    for(int i=0; i<4 ; i++){
-                        printf("Index = %d, Type = %c, X = %c.\n", parameters[i].index, parameters[i].type, parameters[i].x);
-                    }
-                    printf("\n\n==================================================================================================\n\n");
-              
-              */
+                salvar_parametros(pilha);
 
-               salvar_parametros(pilha);
-
-               switch(callss){
+                switch(callss){
                     case 3:
                         // printf("Case 3\n");
                         atribui_call(pilha, parameters, 0, registers_param);
@@ -266,6 +257,40 @@ int main() {
                 if_cont++;
                 sscanf(linha, "if %c%c%d %c%c %c%c%d", &exp.tipo1[0], &exp.tipo1[1], &exp.ind1, &oprel[0], &oprel[1], &exp.tipo2[0], &exp.tipo2[1], &exp.ind2);
 
+            if ((linha[0] == 'c') & (linha[1] == 'a')  & (linha[2] == 'l')  & (linha[3] == 'l')) {
+                callss = sscanf(linha, "call %s %c%c%d %c%c%d %c%c%d", nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
+
+                salvar_parametros(pilha);
+
+                switch(callss){
+                    case 1:
+                        // printf("Case 3\n");
+                        atribui_call(pilha, parameters, 0, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 4:
+                        // printf("Case 6\n");
+                        atribui_call(pilha, parameters, 1, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 7:
+                        // printf("Case 9\n");
+                        atribui_call(pilha, parameters, 2, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 10:
+                        // printf("Case 12\n");
+                        atribui_call(pilha, parameters, 3, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    default:
+                        break;
+                }       
+              
                 printf("\n    if0%d:\n", if_cont);
                 
                 // o tipo 1 armazena o que vai ser printado em segundo lugar
@@ -310,6 +335,31 @@ int main() {
                 bloco_if = true;
                 printf("\n    end_if0%d:\n", if_cont);
                 
+                continue;
+            }
+
+            if ( (( linha[4] == '=' ) && ( linha[7] != 'a')) || (( linha[5] == '=' ) && ( linha[8] != 'a')) ) {
+                callss = sscanf(linha, "v%c%d = %c%c%d %c %c%c%d", &parameters[0].type, &parameters[0].index, &parameters[1].x, &parameters[1].type, &parameters[1].index, &operator, &parameters[2].x, &parameters[2].type, &parameters[2].index);
+
+                // printf("\n\nCallss = %d\n\n", callss);
+                // printf("\n\nx = %c, Type = %c, Index = %d\n\n", parameters[1].x, parameters[1].type, parameters[1].index);
+                printf("\n");
+
+                switch(callss){
+                    case 5:
+                        expressions(pilha, operator, parameters, 1, registers_param);
+                        break;
+                    case 9:
+                        // printf("\n\nCase = 9, Operator = %c\n\n", operator);
+                        expressions(pilha, operator, parameters, 2, registers_param);
+                        break;
+                    default:
+                        break;
+                }
+
+                printf("\n");
+
+                inicializar_parameters(parameters);
                 continue;
             }
         }
