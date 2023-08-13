@@ -6,7 +6,7 @@ var vi3
 vet va4 size ci150
 reg vr5
 enddef
-vr5 = call f2 vi3 va2 pa1
+vr5 = call f2 vi3 va4 pa1
 end
 
 function f2 pa1 pi2 pi3
