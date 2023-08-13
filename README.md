@@ -2,7 +2,6 @@
 Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
 ## Tasks de desenvolvimento (temporário)
-- [ ] Implementar o assembly de condicional;
 - [ ] Implementar o assembly do return de função;
 
 ### Rafael
@@ -14,7 +13,8 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 - [x] Implementar o assembly do armazenamento dos registradores de parâmetros na pilha (no caso de call);
 - [x] Implementar o assembly do armazenamento de variáveis inteiras na pilha;
 - [x] Implementar o assembly do armazenamento de arrays na pilha;
-- [ ] Implementar o assembly de acesso à arrays.
+- [x] Implementar o assembly de acesso à arrays.
+- [x] Implementar o assembly de condicional;
 
 ### Vinicius
 - [x] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call);
