@@ -240,3 +240,293 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
         }
     }
 }
+
+void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, char ** registers_param){
+    int pos;
+    int i;
+    int k;
+    int pos1, pos2, pos3;
+    int isAtribute3, isAtribute2, isAtribute1;
+
+    if(qtd == 1){
+        
+        switch(parameters[0].type){
+            case 'i':
+                for(i=0; i<pilha.var_qtd;i++)
+                    if(parameters[0].index == pilha.var[i].ind) 
+                        pos = pilha.var[i].pos;
+
+                switch(parameters[1].x){
+                    case 'v':
+                        if( parameters[1].type == 'i' ){
+                            for(i=0; i<pilha.var_qtd;i++)
+                                if(parameters[1].index == pilha.var[i].ind) 
+                                    printf("    movl    -%d(%%rbp), %%r8d # r8d = %c%c%d\n", pilha.var[i].pos, parameters[1].x, parameters[1].type, parameters[1].index);
+                            printf("    movl    %%r8d, -%d(%%rbp) # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        }
+                        else{
+                            for(i=0; i<pilha.reg_qtd;i++)
+                                if(parameters[1].index == pilha.reg[i].ind) 
+                                    printf("    movl    %%r%dd, %%r8 # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
+                            printf("    movl    %%r8d, -%d(%%rbp) # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        }
+                        break;
+                    case 'p':
+                        for(i=0; i<pilha.param_qtd;i++)
+                            if(parameters[1].index == i+1) 
+                                printf("    movl    %%e%s, %%r8d # r8d = %c%c%d\n", registers_param[i], parameters[1].x, parameters[1].type, parameters[1].index);
+                        printf("    movl    %%r8d, -%d(%%rbp) # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        break;
+                    case 'c':
+                        printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
+                        printf("    movl    %%r8d, -%d(%%rbp) # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        break;
+                }
+                break;
+            case 'r':
+                for(i=0; i<pilha.reg_qtd;i++)
+                    if(parameters[0].index == pilha.reg[i].ind) 
+                        pos = 12 + i;
+
+                switch(parameters[1].x){
+                    case 'v':
+                        if( parameters[1].type == 'i' ){
+                            for(i=0; i<pilha.var_qtd;i++)
+                                if(parameters[1].index == pilha.var[i].ind) 
+                                    printf("    movl    -%d(%%rbp), %%r8d # r8d = %c%c%d\n", pilha.var[i].pos, parameters[1].x, parameters[1].type, parameters[1].index);
+                            printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        }
+                        else{
+                            for(i=0; i<pilha.reg_qtd;i++)
+                                if(parameters[1].index == pilha.reg[i].ind) 
+                                    printf("    movl    %%r%dd, %%r8 # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
+                            printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        }
+                        break;
+                    case 'p':
+                        for(i=0; i<pilha.param_qtd;i++)
+                            if(parameters[1].index == i+1) 
+                                printf("    movl    %%e%s, %%r8d # r8d = %c%c%d\n", registers_param[i], parameters[1].x, parameters[1].type, parameters[1].index);
+                        printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        break;
+                    case 'c':
+                        printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
+                        printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    else{
+        switch(operator){
+            case '+':
+                pos1 = pegapos(parameters[0], pilha, &isAtribute1);
+                pos2 = pegapos(parameters[1], pilha, &isAtribute2);
+                pos3 = pegapos(parameters[2], pilha, &isAtribute3);
+
+                //printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
+
+                if(pos2 == 722){
+                    printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
+                }
+                else if( pos2 > 0 ){
+                    printf("    movl    %%r%dd, %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+                else{
+                    if(isAtribute2 == 0) printf("    movl    %d(%%rbp), %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                    else printf("    movl    %%e%s, %%r8d # r8d = %c%c%d\n", registers_param[parameters[1].index-1], parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+
+                if(pos3 == 722){    
+                    printf("    addl    $%d, %%r8d # r8d = r8d + %d\n", parameters[2].index, parameters[2].index);
+                }
+                else if( pos3 > 0 ){
+                    printf("    addl    %%r%dd, %%r8d # r8d = r8d + %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    
+                }
+                else{
+                    if(isAtribute3 == 0) printf("    addl    %d(%%rbp), %%r8d # r8d = r8d + %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    else printf("    addl    %%e%s, %%r8d # r8d = r8d + %c%c%d\n", registers_param[parameters[2].index-1], parameters[2].x, parameters[2].type, parameters[2].index);
+                }
+
+                if( pos1 > 0 ){
+                    printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+                else{
+                    printf("    movl    %%r8d, %d(%%rbp) # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+                
+                break;
+            case '-':
+                pos1 = pegapos(parameters[0], pilha, &isAtribute1);
+                pos2 = pegapos(parameters[1], pilha, &isAtribute2);
+                pos3 = pegapos(parameters[2], pilha, &isAtribute3);
+
+                //printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
+
+                if(pos2 == 722){
+                    printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
+                }
+                else if( pos2 > 0 ){
+                    printf("    movl    %%r%dd, %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+                else{
+                    if(isAtribute2 == 0) printf("    movl    %d(%%rbp), %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                    else printf("    movl    %%e%s, %%r8d # r8d = %c%c%d\n", registers_param[parameters[1].index-1], parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+
+                if(pos3 == 722){    
+                    printf("    subl    $%d, %%r8d # r8d = r8d - %d\n", parameters[2].index, parameters[2].index);
+                }
+                else if( pos3 > 0 ){
+                    printf("    subl    %%r%dd, %%r8d # r8d = r8d - %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                }
+                else{
+                    if(isAtribute3 == 0) printf("    subl    %d(%%rbp), %%r8d # r8d = r8d - %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    else printf("    subl    %%e%s, %%r8d # r8d = r8d - %c%c%d\n", registers_param[parameters[2].index-1], parameters[2].x, parameters[2].type, parameters[2].index);
+                }
+
+                if( pos1 > 0 ){
+                    printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+                else{
+                    printf("    movl    %%r8d, %d(%%rbp) # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+
+                break;
+            case '*':
+                pos1 = pegapos(parameters[0], pilha, &isAtribute1);
+                pos2 = pegapos(parameters[1], pilha, &isAtribute2);
+                pos3 = pegapos(parameters[2], pilha, &isAtribute3);
+
+                
+
+               // printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
+
+
+                if(pos2 == 722){
+                    printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
+                }
+                else if( pos2 > 0 ){
+                    printf("    movl    %%r%dd, %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+                else{
+                    if(isAtribute2 == 0) printf("    movl    %d(%%rbp), %%r8d # r8d = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                    else printf("    movl    %%e%s, %%r8d # r8d = %c%c%d\n", registers_param[parameters[1].index-1], parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+
+                if(pos3 == 722){    
+                    printf("    imull    $%d, %%r8d # r8d = r8d * %d\n", parameters[2].index, parameters[2].index);
+                }
+                else if( pos3 > 0 ){
+                    printf("    imull    %%r%dd, %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                }
+                else{
+                    if(isAtribute3 == 0) printf("    imull    %d(%%rbp), %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    else printf("    imull    %%e%s, %%r8d # r8d = r8d * %c%c%d\n", registers_param[parameters[2].index-1], parameters[2].x, parameters[2].type, parameters[2].index);
+                }
+
+                if( pos1 > 0 ){
+                    printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+                else{
+                    printf("    movl    %%r8d, %d(%%rbp) # %c%c%d = r8d\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+
+                break;
+            case '/':
+                pos1 = pegapos(parameters[0], pilha, &isAtribute1);
+                pos2 = pegapos(parameters[1], pilha, &isAtribute2);
+                pos3 = pegapos(parameters[2], pilha, &isAtribute3);
+
+                //printf("\n\nPOS2 = %d", pos2);
+
+                if(pilha.param_qtd > 0){
+                    if(pilha.param[0].pos%8 == 0){
+                        printf("    movq    %%rdx, -%d(%%rbp) # Salvando rdx\n\n", pilha.param[0].pos);
+                    }
+                    else{
+                        printf("    movq    %%edx, -%d(%%rbp) # Salvando edx\n\n", pilha.param[0].pos);
+                    }
+                }
+
+                if(pos2 == 722){
+                    printf("    movl    $%d, %%eax # eax = %d\n", parameters[1].index, parameters[1].index);
+                }
+                else if( pos2 > 0 ){
+                    printf("    movl    %%r%dd, %%eax # eax = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+                else{
+                    if(isAtribute2 == 0) printf("    movl    %d(%%rbp), %%eax # eax = %c%c%d\n", pos2, parameters[1].x, parameters[1].type, parameters[1].index);
+                    else printf("    movl    %%e%s, %%eax # eax = %c%c%d\n", registers_param[parameters[1].index-1], parameters[1].x, parameters[1].type, parameters[1].index);
+                }
+
+                printf("    cltd\n");
+
+                if(pos3 == 722){    
+                    printf("    movl   $%d, %%r8d # r8d = %d\n", parameters[2].index, parameters[2].index);
+                    printf("    idivl   %%r8d\n");
+                }
+                else if( pos3 > 0 ){
+                    printf("    idivl    %%r%dd\n", pos3);
+                }
+                else{
+                    if(isAtribute3 == 0) printf("    idivl    %d(%%rbp)\n", pos3);
+                    else{
+                        if(parameters[2].index != 3) printf("    idivl    %%e%s\n", registers_param[parameters[2].index-1]);
+                        else printf("    idivl    %d(%%rbp)\n", pos3);
+                    } 
+                }
+
+                if( pos1 > 0 ){
+                    printf("    movl    %%eax, %%r%dd # %c%c%d = eax\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+                else{
+                    printf("    movl    %%eax, %d(%%rbp) # %c%c%d = eax\n", pos1, parameters[0].x, parameters[0].type, parameters[0].index);
+                }
+
+                if(pilha.param_qtd > 0){
+                    if(pilha.param[0].pos%8 == 0){
+                        printf("\n    movq    -%d(%%rbp), %%rdx # Recuperando rdx\n", pilha.param[0].pos);
+                    }
+                    else{
+                        printf("\n    movq    -%d(%%rbp), %%edx # recuperando edx\n", pilha.param[0].pos);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+int pegapos(Typecharint parameters, Pilha pilha, int * x){
+    int i;
+    *x = 0;
+
+    if(parameters.x == 'v'){
+        if(parameters.type == 'i'){
+            for(i=0 ; i<pilha.var_qtd ; i++){
+                if(pilha.var[i].ind == parameters.index) return -(pilha.var[i].pos);
+            }
+        }
+        else {
+            for(i=0 ; i<pilha.reg_qtd ; i++){
+                if( parameters.index == pilha.reg[i].ind ) return 12+i;
+            }
+        }
+
+    }
+    else if(parameters.x == 'p'){
+        for(i=0 ; i<pilha.param_qtd ; i++){
+            if( (i+1) == parameters.index){
+                *x = 1;
+                return -(pilha.param[i].pos);
+            }   
+        }
+        
+    }
+    else return 722;
+}
