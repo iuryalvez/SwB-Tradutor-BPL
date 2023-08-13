@@ -1,12 +1,8 @@
 # Tradutor BPL (Bruno's Programming Language) para Assembly AMD64
 Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
-## Tasks de desenvolvimento (temporário)
-- [ ] Implementar o assembly do return de função;
-
 ### Rafael
 - [x] Implementar o assembly de início da chamada das funções;
-- [ ] Implementar o assembly final de execução das funções;
 
 ### Iury
 - [x] Implementar regra para diferenciar tipos de variáveis locais (var, vet e reg);
@@ -15,6 +11,7 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 - [x] Implementar o assembly do armazenamento de arrays na pilha;
 - [x] Implementar o assembly de acesso à arrays.
 - [x] Implementar o assembly de condicional;
+- [x] Implementar o assembly final (retorno) de execução das funções e condicionais;
 
 ### Vinicius
 - [x] Implementar o assembly do armazenamento das variáveis de registradores na pilha (no caso de call);

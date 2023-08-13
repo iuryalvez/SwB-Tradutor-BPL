@@ -1,9 +1,37 @@
-#ifndef FUNCOES_H
-#define FUNCOES_H
+#ifndef TRADUTOR_H
+#define TRADUTOR_H
 
-#include "padrao.h"
-#include "registradores.h"
-#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
+#define TRUE 1
+#define FALSE 0
+
+#define TAM_LINHA 256
+
+/**
+ * @brief remove /n do final da linha
+ * 
+ * @param ptr variável que percorre a linha até encontrar o /n
+ */
+void remover_newline(char *ptr);
+
+/**
+ * @brief lê uma nova linha
+ * 
+ * @return verdadeiro ou falso
+ */
+int ler_linha(char *string);
+
+#define MAX_REG 16     // há 16 registradores
+
+typedef struct registrador {
+    char nome32[4]; // nome de 32 bits de um registrador 
+    char nome64[4]; // nome de 64 bits de um registrador 
+    int livre;     // disponibilidade do regisrador 
+} Registrador;
+
+void iniciar_registradores(Registrador r[MAX_REG]);
 
 // representa uma variávei local do tipo var
 typedef struct Var{

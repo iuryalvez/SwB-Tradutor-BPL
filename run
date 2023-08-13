@@ -1,6 +1,12 @@
 #!/bin/bash
 
 clear
-gcc -o test tradutor.c ./biblioteca/*.c
-./test < data
+gcc -o test main.c tradutor.c
+./test < "testes/0-geral.bpl"
+# ./test < "testes/1-funcao.bpl"
+# ./test < "testes/2-variavel-local.bpl"
+# ./test < "testes/3-atribuicao.bpl"
+# ./test < "testes/4-chamada-de-funcao.bpl"
+# ./test < "testes/5-acesso-array.bpl"
+# ./test < "testes/6-condicional.bpl"
 rm test
