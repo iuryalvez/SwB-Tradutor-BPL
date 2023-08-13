@@ -9,6 +9,7 @@ int main() {
     char *registers_param[] = {"di", "si", "dx"};
 
     int i;
+    char op;
 
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
 
@@ -26,13 +27,20 @@ int main() {
     int indice_funcao = 0; // índice da função
     char nomefuncao[5]; // f9999 (5 letras)
 
-    // variável de acesso à vetores
-    GS gs;
+    Exp exp;
 
-    // flags de controle
+    // variável de acesso à vetores
+    int size;
+
+    // variável de condicional
+    int if_cont = 0;
+    char oprel[2];
+
+    // flaexp de controle
     bool bloco_declaracao = true; // flag do bloco de declaração da função
     bool bloco_def = false;       // flag do bloco de definição de variáveis locais da função  
     bool bloco_funcao = false;    // flag do bloco de execução da função
+    bool bloco_if = true;         // flag do bloco de if
 
     while(ler_linha(linha) != false) { // continua o loop linha a linha enquanto não chega numa linha nula ou no EOF 
 
@@ -95,7 +103,7 @@ int main() {
         if (bloco_funcao) {
 
             // código do corpo da função aqui (cálculos, chamadas de outras funções, etc)
-            if (strncmp(linha, "end", 3) == 0) { // verifica se a linha é uma finalização de função
+            if (strncmp(linha, "end", 3) == 0 && strncmp(linha, "endif", 5) != 0) { // verifica se a linha é uma finalização de função
                 
                 print_recuperacao(pilha);
 
@@ -110,36 +118,36 @@ int main() {
             }
 
             // código de get ou set
-            if (sscanf(linha, "%cet %ca%d index ci%d %*s %c%c%d", &gs.op, &gs.tipo1, &gs.ind1, &gs.size, &gs.tipo2[0], &gs.tipo2[1], &gs.ind2) == 7) {
+            if (sscanf(linha, "%cet %ca%d index ci%d %*s %c%c%d", &op, &exp.tipo1[0], &exp.ind1, &size, &exp.tipo2[0], &exp.tipo2[1], &exp.ind2) == 7) {
                 
-                if (gs.op == 'g') {
+                if (op == 'g') {
                     
                     // comentário do que iremos fazer
-                    printf("\n    # %c%c%d = %ca%d[%d]\n", gs.tipo2[0], gs.tipo2[1], gs.ind2, gs.tipo1, gs.ind1, gs.size);
+                    printf("\n    # %c%c%d = %ca%d[%d]\n", exp.tipo2[0], exp.tipo2[1], exp.ind2, exp.tipo1[0], exp.ind1, size);
                     
                     // calculando o índice
-                    printf("    movq    $%d, %%r8\n", gs.size);
+                    printf("    movq    $%d, %%r8\n", size);
                     printf("    imulq   $4, %%r8\n");
                     
                     // acessando o endereço do índice
-                    if (gs.tipo1 == 'p') printf("    addq    %%%s, %%r8\n", r[6-gs.ind1].nome64);
+                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[6-exp.ind1].nome64);
                     else {
-                        gs.ind1 = encontrar_indvet(pilha, gs.ind1);
-                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[gs.ind1].pos);
+                        exp.ind1 = encontrar_indvet(pilha, exp.ind1);
+                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[exp.ind1].pos);
                         printf("    addq    %%r9, %%r8\n");
                     }
 
                     // colocando o valor do endereço no lugar de destino
-                    if (gs.tipo2[0] == 'p') {
-                        printf("    movl    (%%r8), %%%s\n", r[6-gs.ind2].nome32);
+                    if (exp.tipo2[0] == 'p') {
+                        printf("    movl    (%%r8), %%%s\n", r[6-exp.ind2].nome32);
                     } 
-                    else if (gs.tipo2[1] == 'i') {
-                        gs.ind2 = encontrar_indvar(pilha, gs.ind2);
-                        printf("    movl    (%%r8), -%d(%%rbp)\n", pilha.var[gs.ind2].pos);
+                    else if (exp.tipo2[1] == 'i') {
+                        exp.ind2 = encontrar_indvar(pilha, exp.ind2);
+                        printf("    movl    (%%r8), -%d(%%rbp)\n", pilha.var[exp.ind2].pos);
                     } 
                     else {
-                        gs.ind2 = encontrar_indreg(pilha, gs.ind2);
-                        printf("    movl    (%%r8), %%r%dd\n", 12+gs.ind2);
+                        exp.ind2 = encontrar_indreg(pilha, exp.ind2);
+                        printf("    movl    (%%r8), %%r%dd\n", 12+exp.ind2);
                     }
 
                     continue;
@@ -147,33 +155,33 @@ int main() {
                 else {
 
                     // comentário do que iremos fazer
-                    printf("\n    # %ca%d[%d] = %c%c%d\n", gs.tipo1, gs.ind1, gs.size, gs.tipo2[0], gs.tipo2[1], gs.ind2);
+                    printf("\n    # %ca%d[%d] = %c%c%d\n", exp.tipo1[0], exp.ind1, size, exp.tipo2[0], exp.tipo2[1], exp.ind2);
 
                     // colocar o valor em um registrador
-                    if (gs.tipo2[0] == 'c') {
-                        printf("    movl    $%d, %%r10d\n", gs.ind2);
+                    if (exp.tipo2[0] == 'c') {
+                        printf("    movl    $%d, %%r10d\n", exp.ind2);
                     }
-                    else if (gs.tipo2[0] == 'p') {
-                        printf("    movl    %%%s, %%r10d\n", r[6-gs.ind2].nome32);
+                    else if (exp.tipo2[0] == 'p') {
+                        printf("    movl    %%%s, %%r10d\n", r[6-exp.ind2].nome32);
                     }
-                    else if (gs.tipo2[1] == 'i') {
-                        gs.ind2 = encontrar_indvar(pilha, gs.ind2);
-                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.var[gs.ind2].pos);
+                    else if (exp.tipo2[1] == 'i') {
+                        exp.ind2 = encontrar_indvar(pilha, exp.ind2);
+                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.var[exp.ind2].pos);
                     }
                     else {
-                        gs.ind2 = encontrar_indreg(pilha, gs.ind2);
-                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.reg[gs.ind2].pos);
+                        exp.ind2 = encontrar_indreg(pilha, exp.ind2);
+                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.reg[exp.ind2].pos);
                     }
                     
                     // calculando o índice
-                    printf("    movq    $%d, %%r8\n", gs.size);
+                    printf("    movq    $%d, %%r8\n", size);
                     printf("    imulq   $4, %%r8\n");
 
                     // acessar o vetor
-                    if (gs.tipo1 == 'p') printf("    addq    %%%s, %%r8\n", r[6-gs.ind1].nome64);
+                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[6-exp.ind1].nome64);
                     else {
-                        gs.ind1 = encontrar_indvet(pilha, gs.ind1);
-                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[gs.ind1].pos);
+                        exp.ind1 = encontrar_indvet(pilha, exp.ind1);
+                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[exp.ind1].pos);
                         printf("    addq    %%r9, %%r8\n");
                     }
 
@@ -252,55 +260,56 @@ int main() {
 
                 continue;
             }
+            
+            if (strncmp(linha, "if", 2) == 0 && bloco_if) {
+                bloco_if = false;
+                if_cont++;
+                sscanf(linha, "if %c%c%d %c%c %c%c%d", &exp.tipo1[0], &exp.tipo1[1], &exp.ind1, &oprel[0], &oprel[1], &exp.tipo2[0], &exp.tipo2[1], &exp.ind2);
 
-            if ((linha[0] == 'c') & (linha[1] == 'a')  & (linha[2] == 'l')  & (linha[3] == 'l')) {
-                callss = sscanf(linha, "call %s %c%c%d %c%c%d %c%c%d", nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
-                // 12 parametros a serem lidos, 0 var = 3, 1 var = 6, 2 var = 9, 3 var = 12.
+                printf("\n    if0%d:\n", if_cont);
+                
+                // o tipo 1 armazena o que vai ser printado em segundo lugar
+                if (exp.tipo1[0] == 'c') printf("    movl    $%d, %%r8\n", exp.ind1);
+                else if (exp.tipo1[0] == 'p') printf("    movl    %%%s, %%r8\n", r[6 - exp.ind1].nome32);
+                else if (exp.tipo1[1] == 'i') {
+                    exp.ind1 = encontrar_indvar(pilha, exp.ind1);
+                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind1].pos);
+                }
+                else {
+                    exp.ind1 = encontrar_indreg(pilha, exp.ind1);
+                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind1].pos);
+                }
+                
+                // o tipo 2 armazena o que vai ser printado em primeiro lugar
+                if (exp.tipo2[0] == 'c') printf("    movl    $%d, %%r9\n", exp.ind2);
+                else if (exp.tipo2[0] == 'p') printf("    movl    %%%s, %%r9\n", r[6 - exp.ind2].nome32);
+                else if (exp.tipo2[1] == 'i') { 
+                    exp.ind2 = encontrar_indvar(pilha, exp.ind2);
+                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind2].pos);
+                }
+                else { 
+                    exp.ind1 = encontrar_indreg(pilha, exp.ind2);
+                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind2].pos);
+                }
 
-              /*
-                    printf("\n\n==================================================================================================\n\n");
-                    printf("\n\nCallss = %d\n\n", callss);
-                    for(int i=0; i<4 ; i++){
-                        printf("Index = %d, Type = %c, X = %c.\n", parameters[i].index, parameters[i].type, parameters[i].x);
-                    }
-                    printf("\n\n==================================================================================================\n\n");
-              
-              */
+                printf("    cmpl    %%r9, %%r8\n");
 
-               salvar_parametros(pilha);
+                if(oprel[0] == 'e') printf("    jne end_if0%d", if_cont);
+                else if (oprel[0] == 'n') printf("    je end_if0%d", if_cont);
+                else if (oprel[0] == 'l' && oprel[1] == 't') printf("    jge end_if0%d", if_cont);
+                else if (oprel[0] == 'l' && oprel[1] == 'e') printf("    jg end_if0%d", if_cont);
+                else if (oprel[0] == 'g' && oprel[1] == 't') printf("    jle end_if0%d", if_cont);
+                else printf("    jl end_if0%d", if_cont);
+                
+                printf(" # if !(%c%c%d %c%c %c%c%d) goto end_if0%d\n", exp.tipo1[0], exp.tipo1[1], exp.ind1, oprel[0], oprel[1], exp.tipo2[0], exp.tipo2[1], exp.ind2, if_cont);
+                
+                continue;
+            }
 
-               switch(callss){
-                    case 1:
-                        // printf("Case 3\n");
-                        atribui_call(pilha, parameters, 0, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 4:
-                        // printf("Case 6\n");
-                        atribui_call(pilha, parameters, 1, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 7:
-                        // printf("Case 9\n");
-                        atribui_call(pilha, parameters, 2, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 10:
-                        // printf("Case 12\n");
-                        atribui_call(pilha, parameters, 3, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    default:
-                        break;
-               }       
-
-                recuperar_parametros(pilha);
-                inicializar_parameters(parameters);
-
+            if (strncmp(linha, "endif", 5) == 0) {
+                bloco_if = true;
+                printf("\n    end_if0%d:\n", if_cont);
+                
                 continue;
             }
         }

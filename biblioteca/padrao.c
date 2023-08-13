@@ -1,4 +1,5 @@
 #include "../include/padrao.h"
+#include "../include/funcoes.h"
 
 void remover_newline(char *ptr) {
 	while (*ptr) {
