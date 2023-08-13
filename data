@@ -1,30 +1,12 @@
-function f1 pa1 pa2 pa3
+function f1 pi1 pi2 pa3
 def
 var vi1
 var vi2
 var vi3
 vet va4 size ci150
 reg vr5
-enddef
-vr5 = call f2 vi3 va2 pa1
-end
-
-function f2 pa1 pi2 pi3
-def
-vet va1 size ci2
-vet va2 size ci5
-var vi3
-reg vr4
-var vi5
 reg vr6
+reg vr7
 enddef
-get pa1 index ci0 to pi2
-end
-
-function f3 pi1
-def
-var vi1
-vet va2 size ci30
-var vi3
-enddef
+vr6 = call f2
 end

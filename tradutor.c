@@ -6,6 +6,8 @@ int main() {
     printf(".data\n\n");
     printf(".text\n\n");
 
+    char *registers_param[] = {"di", "si", "dx"};
+
     int i;
 
     char linha[TAM_LINHA]; // armazena a linha lida do arquivo 
@@ -164,22 +166,26 @@ int main() {
 
                switch(callss){
                     case 3:
-                        // atribui_call(pilha, parameters, 3);
+                        // printf("Case 3\n");
+                        atribui_call(pilha, parameters, 0, registers_param);
                         callfuncao(nomefuncao);
 
                         break;
                     case 6:
-                        // atribui_call(pilha, parameters, 3);
+                        // printf("Case 6\n");
+                        atribui_call(pilha, parameters, 1, registers_param);
                         callfuncao(nomefuncao);
 
                         break;
                     case 9:
-                        // atribui_call(pilha, parameters, 3);
+                        // printf("Case 9\n");
+                        atribui_call(pilha, parameters, 2, registers_param);
                         callfuncao(nomefuncao);
 
                         break;
                     case 12:
-                        // atribui_call(pilha, parameters, 3);
+                        // printf("Case 12\n");
+                        atribui_call(pilha, parameters, 3, registers_param);
                         callfuncao(nomefuncao);
 
                         break;
@@ -187,21 +193,19 @@ int main() {
                         break;
                }       
 
-               printf("\n\n\nType = %c\n\n\n", parameters[0].type);
-
                if( parameters[0].type == 'a' ){
                     for(i=0 ; i<pilha.vet_qtd ; i++){
-                        if(pilha.vet[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.vet[i].pos,parameters[0].type,parameters[0].index);
+                        if(pilha.vet[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.vet[i].pos,parameters[0].type,parameters[0].index); // vax = Retorno
                     }
                }
                else if( parameters[0].type == 'r' ){
                     for(i=0 ; i<pilha.reg_qtd ; i++){
-                        if(pilha.reg[i].ind == parameters[0].index) printf("\n    movq      %%rax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.reg[i].pos,parameters[0].type,parameters[0].index);
+                        if(pilha.reg[i].ind == parameters[0].index) printf("\n    movl      %%eax, %%r%dd # v%c%d = Retorno da função\n",12+i,parameters[0].type, parameters[0].index); // vrx = Retorno
                     }
                }
                else {
                     for(i=0 ; i<pilha.var_qtd ; i++){
-                        if(pilha.var[i].ind == parameters[0].index) printf("\n    movl      %%eax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.var[i].pos,parameters[0].type,parameters[0].index);
+                        if(pilha.var[i].ind == parameters[0].index) printf("\n    movl      %%eax, -%d(%%rbp) # v%c%d = Retorno da função\n",pilha.var[i].pos,parameters[0].type,parameters[0].index); // vix = Retorno
                     }
                }
 
