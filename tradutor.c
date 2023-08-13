@@ -15,72 +15,15 @@ int ler_linha(char * linha) {
     return FALSE;
 }
 
-void iniciar_registradores(Registrador r[MAX_REG]) {
+void iniciar_r(Reg_param r[3]) {
+    strcpy(r[0].nome32, "edi");
+    strcpy(r[0].nome64, "rdi");
     
-    strcpy(r[0].nome32, "eax");
-    strcpy(r[0].nome64, "rax");
-    r[0].livre = TRUE;
+    strcpy(r[1].nome32, "edx");
+    strcpy(r[1].nome64, "rdx");
 
-    strcpy(r[1].nome32, "ebx");
-    strcpy(r[1].nome64, "rbx");
-    r[1].livre = TRUE;
-    
-    strcpy(r[2].nome32, "ecx");
-    strcpy(r[2].nome64, "rcx");
-    r[2].livre = TRUE;
-
-    strcpy(r[3].nome32, "edx");
-    strcpy(r[3].nome64, "rdx");
-    r[3].livre = TRUE;
-
-    strcpy(r[4].nome32, "esi");
-    strcpy(r[4].nome64, "rsi");
-    r[4].livre = TRUE;
-    
-    strcpy(r[5].nome32, "edi");
-    strcpy(r[5].nome64, "rdi");
-    r[5].livre = TRUE;
-    
-    strcpy(r[6].nome32, "ebp");
-    strcpy(r[6].nome64, "rbp");
-    r[6].livre = TRUE;
-    
-    strcpy(r[7].nome32, "esp");
-    strcpy(r[7].nome64, "rsp");
-    r[7].livre = TRUE;
-
-    strcpy(r[8].nome32, "r8d");
-    strcpy(r[8].nome64, "r8");
-    r[8].livre = TRUE;
-    
-    strcpy(r[9].nome32, "r9d");
-    strcpy(r[9].nome64, "r9");
-    r[9].livre = TRUE;
-    
-    strcpy(r[10].nome32, "r10d");
-    strcpy(r[10].nome64, "r10");
-    r[10].livre = TRUE;
-    
-    strcpy(r[11].nome32, "r11d");
-    strcpy(r[11].nome64, "r11");
-    r[11].livre = TRUE;
-    
-    strcpy(r[12].nome32, "r12d");
-    strcpy(r[12].nome64, "r12");
-    r[12].livre = TRUE;
-    
-    strcpy(r[13].nome32, "r13d");
-    strcpy(r[13].nome64, "r13");
-    r[13].livre = TRUE;
-    
-    strcpy(r[14].nome32, "r14d");
-    strcpy(r[14].nome64, "r14");
-    r[14].livre = TRUE;
-    
-    strcpy(r[15].nome32, "r15d");
-    strcpy(r[15].nome64, "r15");
-    r[15].livre = TRUE;
-
+    strcpy(r[2].nome32, "esi");
+    strcpy(r[2].nome64, "rsi");
 }
 
 void inicializar_pilha(Pilha *pilha) {
@@ -112,8 +55,8 @@ void inicializar_pilha(Pilha *pilha) {
 void armazenar_pilha(Pilha *pilha) {
     int i;
 
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
     
     if (pilha->param_qtd || pilha->var_qtd || pilha->vet_qtd || pilha->reg_qtd) printf("\n    # pilha:\n");
     
@@ -169,11 +112,11 @@ void armazenar_pilha(Pilha *pilha) {
 void print_armazenamento(Pilha pilha) {
     int i;
 
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
     
     if (pilha.param_qtd || pilha.var_qtd || pilha.vet_qtd || pilha.reg_qtd) {
-        printf("\n    # armazenar todas as variáveis num multiplo de 16\n");
+        printf("\n    # espaco para armazenamento (topo deve ser multiplo de 16)\n");
         printf("    subq    $%d, %%rsp\n", pilha.rsp);
     } else printf("\n    # nao ha o que guardar na pilha");
 
@@ -182,8 +125,8 @@ void print_armazenamento(Pilha pilha) {
     // só irá armazenar os reg que a função utilizar (definidos no def enddef)
     if (pilha.reg_qtd) {
         for (i = 0; i < pilha.reg_qtd; i++) {
-            printf("\n    # vr%d -> %%%s\n", pilha.reg[i].ind, r[i+12].nome64);
-            printf("    movq    %%%s, -%d(%%rbp)\n", r[i+12].nome64, pilha.reg[i].pos);
+            printf("\n    # vr%d -> %%r%dd\n", pilha.reg[i].ind, i+12);
+            printf("    movl    %%r%dd, -%d(%%rbp)\n", i+12, pilha.reg[i].pos);
         }
     }
 }
@@ -193,13 +136,13 @@ void print_recuperacao(Pilha pilha) {
     // recuperar variáveis locais do tipo reg 
     // só irá recuperar a partir da segunda função
     // só irá recuperar os reg que a função utilizar (definidos no def enddef)
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
     int i;
     if (pilha.reg_qtd) {
         for (i = pilha.reg_qtd-1; i >= 0; i--) {
-            printf("\n    # devolvendo o valor do %%%s anterior\n", r[i+12].nome64);
-            printf("    movq    -%d(%%rbp), %%%s\n", pilha.reg[i].pos, r[i+12].nome64);
+            printf("\n    # devolvendo o valor do %%r%dd anterior\n", i+12);
+            printf("    movl    -%d(%%rbp), %%r%dd\n", pilha.reg[i].pos, i+12);
         }
     }
 }
@@ -207,29 +150,29 @@ void print_recuperacao(Pilha pilha) {
 void salvar_parametros(Pilha pilha) {
     int i;
 
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
     
     // printf do assembly de armazenamento, vai utilizar as informações que acabamos de obter
     printf("\n    # %d parametro(s) a ser(em) salvo(s)\n", pilha.param_qtd); 
     for (i = 0; i < pilha.param_qtd; i++) {
         printf("\n    # salvando %dº parametro na pilha\n", i+1);
-        if (pilha.param[i].tipo == 'i') printf("    movl    %%%s, -%d(%%rbp)\n", r[5-i].nome32, pilha.param[i].pos);
-        else printf("    movq    %%%s, -%d(%%rbp)\n", r[5-i].nome64, pilha.param[i].pos);
+        if (pilha.param[i].tipo == 'i') printf("    movl    %%%s, -%d(%%rbp)\n", r[i].nome32, pilha.param[i].pos);
+        else printf("    movq    %%%s, -%d(%%rbp)\n", r[i].nome64, pilha.param[i].pos);
     }
 }
 
 void recuperar_parametros(Pilha pilha) {
     int i;
     
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
 
     printf("\n    # %d parametro(s) a ser(em) recuperado(s)\n", pilha.param_qtd);
     for (i = pilha.param_qtd-1; i >= 0; i--) {
         printf("\n    # recuperando %dº parametro na pilha\n", i+1);
-        if (pilha.param[i].tipo == 'i') printf("    movl    -%d(%%rbp), %%%s\n", pilha.param[i].pos, r[5-i].nome32);
-        else printf("    movq    -%d(%%rbp), %%%s\n", pilha.param[i].pos, r[5-i].nome64);
+        if (pilha.param[i].tipo == 'i') printf("    movl    -%d(%%rbp), %%%s\n", pilha.param[i].pos, r[i].nome32);
+        else printf("    movq    -%d(%%rbp), %%%s\n", pilha.param[i].pos, r[i].nome64);
     }
 }
 
@@ -242,17 +185,12 @@ void alinhar(int *tamanho, int alinhamento) {
 void inicializar_parameters(Typecharint * p){
     int i;
 
-    //printf("\n\n==================================================================================================\n\n");
     for(i=0; i<4 ; i++){
         p[i].index = 0;
         p[i].type = 0;
         p[i].x = 0;
-
         if(i==0) p[i].x = 'v';
-       // printf("Index = %d, Type = %c, X = %c.\n", p[i].index, p[i].type, p[i].x);
     }
-    //printf("\n\n==================================================================================================\n\n");
-
 }
 
 void callfuncao(char * s){
@@ -332,7 +270,7 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                         else{
                             for(i=0; i<pilha.reg_qtd;i++)
                                 if(parameters[1].index == pilha.reg[i].ind) 
-                                    printf("    movl    %%r%dd, %%r8 # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
+                                    printf("    movl    %%r%dd, %%r8d # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
                             printf("    movl    %%r8d, -%d(%%rbp) # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
                         }
                         break;
@@ -364,7 +302,7 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                         else{
                             for(i=0; i<pilha.reg_qtd;i++)
                                 if(parameters[1].index == pilha.reg[i].ind) 
-                                    printf("    movl    %%r%dd, %%r8 # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
+                                    printf("    movl    %%r%dd, %%r8d # r8d = %c%c%d\n", 12+i, parameters[1].x, parameters[1].type, parameters[1].index);
                             printf("    movl    %%r8d, %%r%dd # %c%c%d = r8d\n", pos, parameters[0].x, parameters[0].type, parameters[0].index);
                         }
                         break;
@@ -474,14 +412,14 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 }
 
                 if(pos3 == 722){    
-                    printf("    imull    $%d, %%r8d # r8d = r8d * %d\n", parameters[2].index, parameters[2].index);
+                    printf("    imull   $%d, %%r8d # r8d = r8d * %d\n", parameters[2].index, parameters[2].index);
                 }
                 else if( pos3 > 0 ){
-                    printf("    imull    %%r%dd, %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    printf("    imull   %%r%dd, %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
                 }
                 else{
-                    if(isAtribute3 == 0) printf("    imull    %d(%%rbp), %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
-                    else printf("    imull    %%e%s, %%r8d # r8d = r8d * %c%c%d\n", registers_param[parameters[2].index-1], parameters[2].x, parameters[2].type, parameters[2].index);
+                    if(isAtribute3 == 0) printf("    imull   %d(%%rbp), %%r8d # r8d = r8d * %c%c%d\n", pos3, parameters[2].x, parameters[2].type, parameters[2].index);
+                    else printf("    imull   %%e%s, %%r8d # r8d = r8d * %c%c%d\n", registers_param[parameters[2].index-1], parameters[2].x, parameters[2].type, parameters[2].index);
                 }
 
                 if( pos1 > 0 ){
@@ -499,10 +437,10 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
 
                 if(pilha.param_qtd > 0){
                     if(pilha.param[0].pos%8 == 0){
-                        printf("    movq    %%rdx, -%d(%%rbp) # Salvando rdx\n", pilha.param[0].pos);
+                        printf("    movq    %%rdx, -%d(%%rbp) # salvando rdx\n", pilha.param[0].pos);
                     }
                     else{
-                        printf("    movq    %%edx, -%d(%%rbp) # Salvando edx\n", pilha.param[0].pos);
+                        printf("    movl    %%edx, -%d(%%rbp) # salvando edx\n", pilha.param[0].pos);
                     }
                 }
 
@@ -520,17 +458,17 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 printf("    cltd\n");
 
                 if(pos3 == 722){    
-                    printf("    movl   $%d, %%r8d # r8d = %d\n", parameters[2].index, parameters[2].index);
+                    printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[2].index, parameters[2].index);
                     printf("    idivl   %%r8d\n");
                 }
                 else if( pos3 > 0 ){
-                    printf("    idivl    %%r%dd\n", pos3);
+                    printf("    idivl   %%r%dd\n", pos3);
                 }
                 else{
-                    if(isAtribute3 == 0) printf("    idivl    %d(%%rbp)\n", pos3);
+                    if(isAtribute3 == 0) printf("    idivl   %d(%%rbp)\n", pos3);
                     else{
                         if(parameters[2].index != 3) printf("    idivl    %%e%s\n", registers_param[parameters[2].index-1]);
-                        else printf("    idivl    %d(%%rbp)\n", pos3);
+                        else printf("    idivl   %d(%%rbp)\n", pos3);
                     } 
                 }
 
@@ -543,10 +481,10 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
 
                 if(pilha.param_qtd > 0){
                     if(pilha.param[0].pos%8 == 0){
-                        printf("    movq    -%d(%%rbp), %%rdx # Recuperando rdx\n", pilha.param[0].pos);
+                        printf("    movq    -%d(%%rbp), %%rdx # recuperando rdx\n", pilha.param[0].pos);
                     }
                     else{
-                        printf("    movq    -%d(%%rbp), %%edx # recuperando edx\n", pilha.param[0].pos);
+                        printf("    movl    -%d(%%rbp), %%edx # recuperando edx\n", pilha.param[0].pos);
                     }
                 }
                 break;

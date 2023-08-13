@@ -1,12 +1,13 @@
 #!/bin/bash
 
-clear
 gcc -o test main.c tradutor.c
-./test < "testes/0-geral.bpl"
-# ./test < "testes/1-funcao.bpl"
-# ./test < "testes/2-variavel-local.bpl"
-# ./test < "testes/3-atribuicao.bpl"
-# ./test < "testes/4-chamada-de-funcao.bpl"
-# ./test < "testes/5-acesso-array.bpl"
-# ./test < "testes/6-condicional.bpl"
+./test < "testes/0-geral.bpl" # terminal
+# ./test < "testes/0-geral.bpl" > output.S
+# ./test < "testes/1-funcao.bpl" > output.S
+# ./test < "testes/2-variavel-local.bpl" > output.S
+# ./test < "testes/3-atribuicao.bpl" > output.S
+# ./test < "testes/4-chamada-de-funcao.bpl" > output.S
+# ./test < "testes/5-acesso-array.bpl" > output.S
+# ./test < "testes/6-condicional.bpl" > output.S
 rm test
+# gcc -o test output.S
