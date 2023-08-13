@@ -252,6 +252,57 @@ int main() {
 
                 continue;
             }
+
+            if ((linha[0] == 'c') & (linha[1] == 'a')  & (linha[2] == 'l')  & (linha[3] == 'l')) {
+                callss = sscanf(linha, "call %s %c%c%d %c%c%d %c%c%d", nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
+                // 12 parametros a serem lidos, 0 var = 3, 1 var = 6, 2 var = 9, 3 var = 12.
+
+              /*
+                    printf("\n\n==================================================================================================\n\n");
+                    printf("\n\nCallss = %d\n\n", callss);
+                    for(int i=0; i<4 ; i++){
+                        printf("Index = %d, Type = %c, X = %c.\n", parameters[i].index, parameters[i].type, parameters[i].x);
+                    }
+                    printf("\n\n==================================================================================================\n\n");
+              
+              */
+
+               salvar_parametros(pilha);
+
+               switch(callss){
+                    case 1:
+                        // printf("Case 3\n");
+                        atribui_call(pilha, parameters, 0, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 4:
+                        // printf("Case 6\n");
+                        atribui_call(pilha, parameters, 1, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 7:
+                        // printf("Case 9\n");
+                        atribui_call(pilha, parameters, 2, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    case 10:
+                        // printf("Case 12\n");
+                        atribui_call(pilha, parameters, 3, registers_param);
+                        callfuncao(nomefuncao);
+
+                        break;
+                    default:
+                        break;
+               }       
+
+                recuperar_parametros(pilha);
+                inicializar_parameters(parameters);
+
+                continue;
+            }
         }
     }
     return 0;
