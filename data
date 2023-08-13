@@ -5,8 +5,9 @@ var vi2
 var vi3
 vet va4 size ci150
 reg vr5
+reg vr12
 enddef
-vr5 = call f2 vi3 va4 pa1
+vr12 = call f2 vi3 va4 pa1
 end
 
 function f2 pa1 pi2 pi3
@@ -18,6 +19,7 @@ reg vr4
 var vi5
 reg vr6
 enddef
+call f1 vi3 vr4 pa3
 get pa1 index ci0 to pi2
 get pa1 index ci10 to vi3
 get pa1 index ci5  to vr4
