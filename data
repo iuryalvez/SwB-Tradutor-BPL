@@ -8,5 +8,25 @@ reg vr5
 reg vr6
 reg vr7
 enddef
-vr6 = call f2
+vr6 = call f2 pa3 pi2 pi1
+get pa1 index ci0 to pi2
+get pa1 index ci10 to vi3
+get pa1 index ci5  to vr4
+get va1 index ci1 to pi2
+get va2 index ci4 to vi3
+get va1 index ci0  to vr4
+set pa1 index ci0 with pi2
+set pa1 index ci10 with vi3
+set pa1 index ci5 with vr4
+set va1 index ci1 with pi2
+set va2 index ci4 with vi3
+set va1 index ci0 with vr4
+end
+
+function f3 pi1
+def
+var vi1
+vet va2 size ci30
+var vi3
+enddef
 end

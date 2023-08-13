@@ -4,5 +4,6 @@
 #include "registradores.h"
 #include "padrao.h"
 #include "funcoes.h"
+#include "arrays.h"
 
 #endif
