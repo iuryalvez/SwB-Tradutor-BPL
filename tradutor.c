@@ -186,7 +186,7 @@ int main() {
             }
             
 
-            if ((linha[0] == 'v') & (linha[4] == '=')  & (linha[6] == 'c')  & (linha[7] == 'a')  & (linha[8] == 'l')  & (linha[9] == 'l') ) { // verifica se a linha é uma chamada de função
+            if ((linha[0] == 'v') & (linha[4] == '=')  & (linha[6] == 'c')  & (linha[7] == 'a')  & (linha[8] == 'l')  & (linha[9] == 'l') || (linha[0] == 'v') & (linha[5] == '=')  & (linha[7] == 'c')  & (linha[8] == 'a')  & (linha[9] == 'l')  & (linha[10] == 'l')) { // verifica se a linha é uma chamada de função
                 callss = sscanf(linha, "v%c%d = call %s %c%c%d %c%c%d %c%c%d", &parameters[0].type, &parameters[0].index, nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
                 // 12 parametros a serem lidos, 0 var = 3, 1 var = 6, 2 var = 9, 3 var = 12.
 
