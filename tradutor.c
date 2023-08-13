@@ -24,10 +24,8 @@ int main() {
     int indice_funcao = 0; // índice da função
     char nomefuncao[5]; // f9999 (5 letras)
 
-    // variáveis de acesso à vetores
-    int arr;  // array
-    int ind;  // índice
-    int dest; // destino
+    // variável de acesso à vetores
+    GS gs;
 
     // flags de controle
     bool bloco_declaracao = true; // flag do bloco de declaração da função
@@ -109,42 +107,82 @@ int main() {
                 continue;
             }
 
-            if (strncmp(linha, "get", 3) == 0) {
-                // sscanf(line, "get %ca%d index ci%d %*s %ci%d", 
-                // &_1_operand_type,
-                // &_1_operand_index,
-                // &vet_size,
-                // &_2_operand_type,
-                // &_2_operand_index);
-            
-
-                // printf("\n    movq    $%d, %%r10\n", vet_size);
-                // printf("    imulq   $4, %%r10\n");
-
-                // if(_1_operand_type == 'v'){
-                    // printf("    leaq    -%d(%%rbp), %%r9\n", var_stack[_1_operand_index-1]);
-                // }
-                // if(_1_operand_type == 'p'){
-                    // printf("    movq    -%d(%%rbp), %%r9\n", para_stack[_1_operand_index-1]);
-                // }
+            // código de get ou set
+            if (sscanf(linha, "%cet %ca%d index ci%d %*s %c%c%d", &gs.op, &gs.tipo1, &gs.ind1, &gs.size, &gs.tipo2[0], &gs.tipo2[1], &gs.ind2) == 7) {
                 
-                // printf("    addq    %%r9, %%r10\n");
-                // printf("    movl    (%%r10), %%r8d\n");
+                if (gs.op == 'g') {
+                    
+                    // comentário do que iremos fazer
+                    printf("\n    # %c%c%d = %ca%d[%d]\n", gs.tipo2[0], gs.tipo2[1], gs.ind2, gs.tipo1, gs.ind1, gs.size);
+                    
+                    // calculando o índice
+                    printf("    movq    $%d, %%r8\n", gs.size);
+                    printf("    imulq   $4, %%r8\n");
+                    
+                    // acessando o endereço do índice
+                    if (gs.tipo1 == 'p') printf("    addq    %%%s, %%r8\n", r[6-gs.ind1].nome64);
+                    else {
+                        gs.ind1 = encontrar_indvet(pilha, gs.ind1);
+                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[gs.ind1].pos);
+                        printf("    addq    %%r9, %%r8\n");
+                    }
 
-                // if(_2_operand_type == 'v'){
-                    // printf("    movl    %%r8d, -%d(%%rbp)\n", var_stack[_2_operand_index-1]);
-                // }
-                // if(_2_operand_type == 'p'){
-                    // printf("    movl    %%r8d, -%d(%%rbp)\n", para_stack[_2_operand_index-1]);
-                // }
+                    // colocando o valor do endereço no lugar de destino
+                    if (gs.tipo2[0] == 'p') {
+                        printf("    movl    (%%r8), %%%s\n", r[6-gs.ind2].nome32);
+                    } 
+                    else if (gs.tipo2[1] == 'i') {
+                        gs.ind2 = encontrar_indvar(pilha, gs.ind2);
+                        printf("    movl    (%%r8), -%d(%%rbp)\n", pilha.var[gs.ind2].pos);
+                    } 
+                    else {
+                        gs.ind2 = encontrar_indreg(pilha, gs.ind2);
+                        printf("    movl    (%%r8), %%r%dd\n", 12+gs.ind2);
+                    }
 
-                continue;
+                    continue;
+                }
+                else {
+
+                    // comentário do que iremos fazer
+                    printf("\n    # %ca%d[%d] = %c%c%d\n", gs.tipo1, gs.ind1, gs.size, gs.tipo2[0], gs.tipo2[1], gs.ind2);
+
+                    // colocar o valor em um registrador
+                    if (gs.tipo2[0] == 'c') {
+                        printf("    movl    $%d, %%r10d\n", gs.ind2);
+                    }
+                    else if (gs.tipo2[0] == 'p') {
+                        printf("    movl    %%%s, %%r10d\n", r[6-gs.ind2].nome32);
+                    }
+                    else if (gs.tipo2[1] == 'i') {
+                        gs.ind2 = encontrar_indvar(pilha, gs.ind2);
+                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.var[gs.ind2].pos);
+                    }
+                    else {
+                        gs.ind2 = encontrar_indreg(pilha, gs.ind2);
+                        printf("    movl    -%d(%%rbp), %%r10d\n", pilha.reg[gs.ind2].pos);
+                    }
+                    
+                    // calculando o índice
+                    printf("    movq    $%d, %%r8\n", gs.size);
+                    printf("    imulq   $4, %%r8\n");
+
+                    // acessar o vetor
+                    if (gs.tipo1 == 'p') printf("    addq    %%%s, %%r8\n", r[6-gs.ind1].nome64);
+                    else {
+                        gs.ind1 = encontrar_indvet(pilha, gs.ind1);
+                        printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[gs.ind1].pos);
+                        printf("    addq    %%r9, %%r8\n");
+                    }
+
+                    // colocar o resultado no endereço acessado
+                    printf("    movl    %%r10d, (%%r8)\n");
+
+                    continue;
+                }
+
             }
             
-            if (strncmp(linha, "set", 3) == 0) {
-
-                continue;
-            }
 
             if ((linha[0] == 'v') & (linha[4] == '=')  & (linha[6] == 'c')  & (linha[7] == 'a')  & (linha[8] == 'l')  & (linha[9] == 'l') ) { // verifica se a linha é uma chamada de função
                 callss = sscanf(linha, "v%c%d = call %s %c%c%d %c%c%d %c%c%d", &parameters[0].type, &parameters[0].index, nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
