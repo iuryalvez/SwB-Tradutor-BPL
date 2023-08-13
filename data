@@ -18,6 +18,7 @@ reg vr4
 var vi5
 reg vr6
 enddef
+call f1 vi3 vr4 pa3
 get pa1 index ci0 to pi2
 get pa1 index ci10 to vi3
 get pa1 index ci5  to vr4
