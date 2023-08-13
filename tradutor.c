@@ -7,79 +7,79 @@ void remover_newline(char *ptr) {
 	}
 }
 
-bool ler_linha(char * linha) {
+int ler_linha(char * linha) {
 	if (fgets(linha, TAM_LINHA, stdin) != NULL) {
         remover_newline(linha);
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void iniciar_registradores(Registrador r[MAX_REG]) {
     
     strcpy(r[0].nome32, "eax");
     strcpy(r[0].nome64, "rax");
-    r[0].livre = true;
+    r[0].livre = TRUE;
 
     strcpy(r[1].nome32, "ebx");
     strcpy(r[1].nome64, "rbx");
-    r[1].livre = true;
+    r[1].livre = TRUE;
     
     strcpy(r[2].nome32, "ecx");
     strcpy(r[2].nome64, "rcx");
-    r[2].livre = true;
+    r[2].livre = TRUE;
 
     strcpy(r[3].nome32, "edx");
     strcpy(r[3].nome64, "rdx");
-    r[3].livre = true;
+    r[3].livre = TRUE;
 
     strcpy(r[4].nome32, "esi");
     strcpy(r[4].nome64, "rsi");
-    r[4].livre = true;
+    r[4].livre = TRUE;
     
     strcpy(r[5].nome32, "edi");
     strcpy(r[5].nome64, "rdi");
-    r[5].livre = true;
+    r[5].livre = TRUE;
     
     strcpy(r[6].nome32, "ebp");
     strcpy(r[6].nome64, "rbp");
-    r[6].livre = true;
+    r[6].livre = TRUE;
     
     strcpy(r[7].nome32, "esp");
     strcpy(r[7].nome64, "rsp");
-    r[7].livre = true;
+    r[7].livre = TRUE;
 
     strcpy(r[8].nome32, "r8d");
     strcpy(r[8].nome64, "r8");
-    r[8].livre = true;
+    r[8].livre = TRUE;
     
     strcpy(r[9].nome32, "r9d");
     strcpy(r[9].nome64, "r9");
-    r[9].livre = true;
+    r[9].livre = TRUE;
     
     strcpy(r[10].nome32, "r10d");
     strcpy(r[10].nome64, "r10");
-    r[10].livre = true;
+    r[10].livre = TRUE;
     
     strcpy(r[11].nome32, "r11d");
     strcpy(r[11].nome64, "r11");
-    r[11].livre = true;
+    r[11].livre = TRUE;
     
     strcpy(r[12].nome32, "r12d");
     strcpy(r[12].nome64, "r12");
-    r[12].livre = true;
+    r[12].livre = TRUE;
     
     strcpy(r[13].nome32, "r13d");
     strcpy(r[13].nome64, "r13");
-    r[13].livre = true;
+    r[13].livre = TRUE;
     
     strcpy(r[14].nome32, "r14d");
     strcpy(r[14].nome64, "r14");
-    r[14].livre = true;
+    r[14].livre = TRUE;
     
     strcpy(r[15].nome32, "r15d");
     strcpy(r[15].nome64, "r15");
-    r[15].livre = true;
+    r[15].livre = TRUE;
 
 }
 
@@ -115,7 +115,7 @@ void armazenar_pilha(Pilha *pilha) {
     Registrador r[MAX_REG];
     iniciar_registradores(r);
     
-    printf("\n    # pilha:\n");
+    if (pilha->param_qtd || pilha->var_qtd || pilha->vet_qtd || pilha->reg_qtd) printf("\n    # pilha:\n");
     
     // armazenar variáveis locais do tipo var
     if (pilha->var_qtd) {
@@ -172,24 +172,10 @@ void print_armazenamento(Pilha pilha) {
     Registrador r[MAX_REG];
     iniciar_registradores(r);
     
-    printf("\n    # armazenar todas as variáveis\n");
-    printf("    subq    $%d, %%rsp\n", pilha.rsp);
-
-    // armazenar variáveis locais do tipo var
-    if (pilha.var_qtd) {
-        for (i = 0; i < pilha.var_qtd; i++) {
-            printf("\n    # vi%d = 0\n", pilha.var[i].ind);
-            printf("    movl    $0, -%d(%%rbp)\n", pilha.var[i].pos);
-        }
-    }
-    
-    // armazenar variáveis locais do tipo vet
-    if (pilha.vet_qtd) {
-        for (i = 0; i < pilha.vet_qtd; i++) {
-            printf("\n    # salvando endereco inicial do va%d\n", pilha.vet[i].ind);
-            printf("    movq    $0, -%d(%%rbp)\n", pilha.vet[i].pos);
-        }
-    }
+    if (pilha.param_qtd || pilha.var_qtd || pilha.vet_qtd || pilha.reg_qtd) {
+        printf("\n    # armazenar todas as variáveis num multiplo de 16\n");
+        printf("    subq    $%d, %%rsp\n", pilha.rsp);
+    } else printf("\n    # nao ha o que guardar na pilha");
 
     // armazenar variáveis locais do tipo reg 
     // só irá armazenar a partir da segunda função
@@ -278,10 +264,7 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
     int k;
     int pos;
 
-    printf("\n");
-
     for(i=1; i<=numero_args ; i++){
-        // printf("\n\nX=%c, TYPE = %c\n\n", parameters[i].x, parameters[i].type);
         switch(parameters[i].x){
             case 'p':
                 pos = parameters[i].index-1;
@@ -301,14 +284,12 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
                     }
                 }
                 else if( parameters[i].type == 'r' ){
-                    // printf("\nr\n");
                     for(k=0; k<pilha.reg_qtd;k++){
                         if(pilha.reg[k].ind == parameters[i].index)
                             printf("    movl    %%r%dd, %%e%s # e%s = %c%c%d\n", 12+k, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
                     }
                 }
                 else {
-                    // printf("\ni\n");
                     for(k=0; k<pilha.var_qtd;k++){
                         if(pilha.var[k].ind == parameters[i].index)
                             printf("    movl    -%d(%%rbp), %%e%s # e%s = %c%c%d\n", pilha.var[k].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
@@ -410,8 +391,6 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 pos2 = pegapos(parameters[1], pilha, &isAtribute2);
                 pos3 = pegapos(parameters[2], pilha, &isAtribute3);
 
-                //printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
-
                 if(pos2 == 722){
                     printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
                 }
@@ -448,8 +427,6 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 pos2 = pegapos(parameters[1], pilha, &isAtribute2);
                 pos3 = pegapos(parameters[2], pilha, &isAtribute3);
 
-                //printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
-
                 if(pos2 == 722){
                     printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
                 }
@@ -484,11 +461,6 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 pos1 = pegapos(parameters[0], pilha, &isAtribute1);
                 pos2 = pegapos(parameters[1], pilha, &isAtribute2);
                 pos3 = pegapos(parameters[2], pilha, &isAtribute3);
-
-                
-
-               // printf("\n\n isAtribute1 = %d, isAtribute2 = %d, isAtribute3 = %d\n\n", isAtribute1, isAtribute2, isAtribute3);
-
 
                 if(pos2 == 722){
                     printf("    movl    $%d, %%r8d # r8d = %d\n", parameters[1].index, parameters[1].index);
@@ -525,14 +497,12 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
                 pos2 = pegapos(parameters[1], pilha, &isAtribute2);
                 pos3 = pegapos(parameters[2], pilha, &isAtribute3);
 
-                //printf("\n\nPOS2 = %d", pos2);
-
                 if(pilha.param_qtd > 0){
                     if(pilha.param[0].pos%8 == 0){
-                        printf("    movq    %%rdx, -%d(%%rbp) # Salvando rdx\n\n", pilha.param[0].pos);
+                        printf("    movq    %%rdx, -%d(%%rbp) # Salvando rdx\n", pilha.param[0].pos);
                     }
                     else{
-                        printf("    movq    %%edx, -%d(%%rbp) # Salvando edx\n\n", pilha.param[0].pos);
+                        printf("    movq    %%edx, -%d(%%rbp) # Salvando edx\n", pilha.param[0].pos);
                     }
                 }
 
@@ -573,10 +543,10 @@ void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, 
 
                 if(pilha.param_qtd > 0){
                     if(pilha.param[0].pos%8 == 0){
-                        printf("\n    movq    -%d(%%rbp), %%rdx # Recuperando rdx\n", pilha.param[0].pos);
+                        printf("    movq    -%d(%%rbp), %%rdx # Recuperando rdx\n", pilha.param[0].pos);
                     }
                     else{
-                        printf("\n    movq    -%d(%%rbp), %%edx # recuperando edx\n", pilha.param[0].pos);
+                        printf("    movq    -%d(%%rbp), %%edx # recuperando edx\n", pilha.param[0].pos);
                     }
                 }
                 break;
@@ -592,16 +562,13 @@ int pegapos(Typecharint parameters, Pilha pilha, int * x){
 
     if(parameters.x == 'v'){
         if(parameters.type == 'i'){
-            for(i=0 ; i<pilha.var_qtd ; i++){
-                if(pilha.var[i].ind == parameters.index) return -(pilha.var[i].pos);
-            }
+            i = encontrar_indvar(pilha, parameters.index);
+            return -(pilha.var[i].pos);
         }
         else {
-            for(i=0 ; i<pilha.reg_qtd ; i++){
-                if( parameters.index == pilha.reg[i].ind ) return 12+i;
-            }
+            i = encontrar_indreg(pilha, parameters.index);
+            return 12+i;
         }
-
     }
     else if(parameters.x == 'p'){
         for(i=0 ; i<pilha.param_qtd ; i++){
@@ -610,7 +577,6 @@ int pegapos(Typecharint parameters, Pilha pilha, int * x){
                 return -(pilha.param[i].pos);
             }   
         }
-        
     }
     else return 722;
 }

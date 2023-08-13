@@ -23,3 +23,30 @@ get va2 index ci2 to vi3
 endif
 return ci-1
 end
+
+function f2 pa1 pi2 pi3
+def
+vet va1 size ci2
+vet va2 size ci5
+var vi3
+reg vr4
+var vi5
+reg vr6
+enddef
+if ci10 le ci10
+endif
+if ci10 le pi2
+endif
+if ci10 le vi3
+endif
+if ci10 le vr6
+endif
+if ci10 gt ci10
+endif
+if ci10 gt pi2
+endif
+if ci10 gt vi3
+endif
+if ci10 gt vr6
+endif
+end

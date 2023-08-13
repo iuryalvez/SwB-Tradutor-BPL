@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
+
+#define TRUE 1
+#define FALSE 0
 
 #define TAM_LINHA 256
 
@@ -19,14 +21,14 @@ void remover_newline(char *ptr);
  * 
  * @return verdadeiro ou falso
  */
-bool ler_linha(char *string);
+int ler_linha(char *string);
 
 #define MAX_REG 16     // há 16 registradores
 
 typedef struct registrador {
     char nome32[4]; // nome de 32 bits de um registrador 
     char nome64[4]; // nome de 64 bits de um registrador 
-    bool livre;     // disponibilidade do regisrador 
+    int livre;     // disponibilidade do regisrador 
 } Registrador;
 
 void iniciar_registradores(Registrador r[MAX_REG]);
