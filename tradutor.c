@@ -251,92 +251,6 @@ int main() {
 
                 continue;
             }
-            
-            if (strncmp(linha, "if", 2) == 0 && bloco_if) {
-                bloco_if = false;
-                if_cont++;
-                sscanf(linha, "if %c%c%d %c%c %c%c%d", &exp.tipo1[0], &exp.tipo1[1], &exp.ind1, &oprel[0], &oprel[1], &exp.tipo2[0], &exp.tipo2[1], &exp.ind2);
-
-            if ((linha[0] == 'c') & (linha[1] == 'a')  & (linha[2] == 'l')  & (linha[3] == 'l')) {
-                callss = sscanf(linha, "call %s %c%c%d %c%c%d %c%c%d", nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
-
-                salvar_parametros(pilha);
-
-                switch(callss){
-                    case 1:
-                        // printf("Case 3\n");
-                        atribui_call(pilha, parameters, 0, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 4:
-                        // printf("Case 6\n");
-                        atribui_call(pilha, parameters, 1, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 7:
-                        // printf("Case 9\n");
-                        atribui_call(pilha, parameters, 2, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    case 10:
-                        // printf("Case 12\n");
-                        atribui_call(pilha, parameters, 3, registers_param);
-                        callfuncao(nomefuncao);
-
-                        break;
-                    default:
-                        break;
-                }       
-              
-                printf("\n    if0%d:\n", if_cont);
-                
-                // o tipo 1 armazena o que vai ser printado em segundo lugar
-                if (exp.tipo1[0] == 'c') printf("    movl    $%d, %%r8\n", exp.ind1);
-                else if (exp.tipo1[0] == 'p') printf("    movl    %%%s, %%r8\n", r[6 - exp.ind1].nome32);
-                else if (exp.tipo1[1] == 'i') {
-                    exp.ind1 = encontrar_indvar(pilha, exp.ind1);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind1].pos);
-                }
-                else {
-                    exp.ind1 = encontrar_indreg(pilha, exp.ind1);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind1].pos);
-                }
-                
-                // o tipo 2 armazena o que vai ser printado em primeiro lugar
-                if (exp.tipo2[0] == 'c') printf("    movl    $%d, %%r9\n", exp.ind2);
-                else if (exp.tipo2[0] == 'p') printf("    movl    %%%s, %%r9\n", r[6 - exp.ind2].nome32);
-                else if (exp.tipo2[1] == 'i') { 
-                    exp.ind2 = encontrar_indvar(pilha, exp.ind2);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind2].pos);
-                }
-                else { 
-                    exp.ind1 = encontrar_indreg(pilha, exp.ind2);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind2].pos);
-                }
-
-                printf("    cmpl    %%r9, %%r8\n");
-
-                if(oprel[0] == 'e') printf("    jne end_if0%d", if_cont);
-                else if (oprel[0] == 'n') printf("    je end_if0%d", if_cont);
-                else if (oprel[0] == 'l' && oprel[1] == 't') printf("    jge end_if0%d", if_cont);
-                else if (oprel[0] == 'l' && oprel[1] == 'e') printf("    jg end_if0%d", if_cont);
-                else if (oprel[0] == 'g' && oprel[1] == 't') printf("    jle end_if0%d", if_cont);
-                else printf("    jl end_if0%d", if_cont);
-                
-                printf(" # if !(%c%c%d %c%c %c%c%d) goto end_if0%d\n", exp.tipo1[0], exp.tipo1[1], exp.ind1, oprel[0], oprel[1], exp.tipo2[0], exp.tipo2[1], exp.ind2, if_cont);
-                
-                continue;
-            }
-
-            if (strncmp(linha, "endif", 5) == 0) {
-                bloco_if = true;
-                printf("\n    end_if0%d:\n", if_cont);
-                
-                continue;
-            }
 
             if ( (( linha[4] == '=' ) && ( linha[7] != 'a')) || (( linha[5] == '=' ) && ( linha[8] != 'a')) ) {
                 callss = sscanf(linha, "v%c%d = %c%c%d %c %c%c%d", &parameters[0].type, &parameters[0].index, &parameters[1].x, &parameters[1].type, &parameters[1].index, &operator, &parameters[2].x, &parameters[2].type, &parameters[2].index);
@@ -362,8 +276,121 @@ int main() {
                 inicializar_parameters(parameters);
                 continue;
             }
+            
+            if (strncmp(linha, "if", 2) == 0 && bloco_if) {
+                bloco_if = false;
+                if_cont++;
+                sscanf(linha, "if %c%c%d %c%c %c%c%d", &exp.tipo1[0], &exp.tipo1[1], &exp.ind1, &oprel[0], &oprel[1], &exp.tipo2[0], &exp.tipo2[1], &exp.ind2);
+
+                if ((linha[0] == 'c') & (linha[1] == 'a')  & (linha[2] == 'l')  & (linha[3] == 'l')) {
+                    callss = sscanf(linha, "call %s %c%c%d %c%c%d %c%c%d", nomefuncao, &parameters[1].x, &parameters[1].type, &parameters[1].index, &parameters[2].x, &parameters[2].type, &parameters[2].index, &parameters[3].x, &parameters[3].type, &parameters[3].index);
+
+                    salvar_parametros(pilha);
+
+                    switch(callss){
+                        case 1:
+                            // printf("Case 3\n");
+                            atribui_call(pilha, parameters, 0, registers_param);
+                            callfuncao(nomefuncao);
+
+                            break;
+                        case 4:
+                            // printf("Case 6\n");
+                            atribui_call(pilha, parameters, 1, registers_param);
+                            callfuncao(nomefuncao);
+
+                            break;
+                        case 7:
+                            // printf("Case 9\n");
+                            atribui_call(pilha, parameters, 2, registers_param);
+                            callfuncao(nomefuncao);
+
+                            break;
+                        case 10:
+                            // printf("Case 12\n");
+                            atribui_call(pilha, parameters, 3, registers_param);
+                            callfuncao(nomefuncao);
+
+                            break;
+                        default:
+                            break;
+                    }       
+                
+                    printf("\n    if0%d:\n", if_cont);
+                    
+                    // o tipo 1 armazena o que vai ser printado em segundo lugar
+                    if (exp.tipo1[0] == 'c') printf("    movl    $%d, %%r8\n", exp.ind1);
+                    else if (exp.tipo1[0] == 'p') printf("    movl    %%%s, %%r8\n", r[6 - exp.ind1].nome32);
+                    else if (exp.tipo1[1] == 'i') {
+                        exp.ind1 = encontrar_indvar(pilha, exp.ind1);
+                        printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind1].pos);
+                    }
+                    else {
+                        exp.ind1 = encontrar_indreg(pilha, exp.ind1);
+                        printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind1].pos);
+                    }
+                    
+                    // o tipo 2 armazena o que vai ser printado em primeiro lugar
+                    if (exp.tipo2[0] == 'c') printf("    movl    $%d, %%r9\n", exp.ind2);
+                    else if (exp.tipo2[0] == 'p') printf("    movl    %%%s, %%r9\n", r[6 - exp.ind2].nome32);
+                    else if (exp.tipo2[1] == 'i') { 
+                        exp.ind2 = encontrar_indvar(pilha, exp.ind2);
+                        printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind2].pos);
+                    }
+                    else { 
+                        exp.ind1 = encontrar_indreg(pilha, exp.ind2);
+                        printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind2].pos);
+                    }
+
+                    printf("    cmpl    %%r9, %%r8\n");
+
+                    if(oprel[0] == 'e') printf("    jne end_if0%d", if_cont);
+                    else if (oprel[0] == 'n') printf("    je end_if0%d", if_cont);
+                    else if (oprel[0] == 'l' && oprel[1] == 't') printf("    jge end_if0%d", if_cont);
+                    else if (oprel[0] == 'l' && oprel[1] == 'e') printf("    jg end_if0%d", if_cont);
+                    else if (oprel[0] == 'g' && oprel[1] == 't') printf("    jle end_if0%d", if_cont);
+                    else printf("    jl end_if0%d", if_cont);
+                    
+                    printf(" # if !(%c%c%d %c%c %c%c%d) goto end_if0%d\n", exp.tipo1[0], exp.tipo1[1], exp.ind1, oprel[0], oprel[1], exp.tipo2[0], exp.tipo2[1], exp.ind2, if_cont);
+                    
+                    continue;
+                }
+
+                if (strncmp(linha, "endif", 5) == 0) {
+                    bloco_if = true;
+                    printf("\n    end_if0%d:\n", if_cont);
+                    
+                    continue;
+                }
+
+                if ( (( linha[4] == '=' ) && ( linha[7] != 'a')) || (( linha[5] == '=' ) && ( linha[8] != 'a')) ) {
+                    callss = sscanf(linha, "v%c%d = %c%c%d %c %c%c%d", &parameters[0].type, &parameters[0].index, &parameters[1].x, &parameters[1].type, &parameters[1].index, &operator, &parameters[2].x, &parameters[2].type, &parameters[2].index);
+
+                    // printf("\n\nCallss = %d\n\n", callss);
+                    // printf("\n\nx = %c, Type = %c, Index = %d\n\n", parameters[1].x, parameters[1].type, parameters[1].index);
+                    printf("\n");
+
+                    switch(callss){
+                        case 5:
+                            expressions(pilha, operator, parameters, 1, registers_param);
+                            break;
+                        case 9:
+                            // printf("\n\nCase = 9, Operator = %c\n\n", operator);
+                            expressions(pilha, operator, parameters, 2, registers_param);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    printf("\n");
+
+                    inicializar_parameters(parameters);
+                    continue;
+                }
+            }
         }
     }
+
+    
     return 0;
 }
-
