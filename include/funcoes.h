@@ -107,9 +107,21 @@ void alinhar(int *tamanho, int alinhamento);
 */
 void inicializar_parameters(Typecharint * p);
 
-
+/**
+ * @brief Printa a chamada de função
+ * 
+ * @param s Nome da função a ser chamada
+ */
 void callfuncao(char * s);
 
-void salva_parametros(Pilha pilha);
+/**
+ * @brief Função responsavel por atribuir os parametros para realizar a chamada de uma função
+ * 
+ * @param pilha Variaveis locais e posições na pilha
+ * @param parameters Informações dos parametros lidos após o call
+ * @param numero_args Quantidade de parametros lidos
+ * @param registers_param Vetor de string que possui di, si, cx
+ */
+void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char ** registers_param);
 
 #endif

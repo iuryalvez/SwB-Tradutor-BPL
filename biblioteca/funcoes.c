@@ -189,3 +189,54 @@ void inicializar_parameters(Typecharint * p){
 void callfuncao(char * s){
     printf("\n    call %s\n", s);
 }
+
+void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char ** registers_param){
+    int i;
+    int k;
+    int pos;
+
+    printf("\n");
+
+    for(i=1; i<=numero_args ; i++){
+        // printf("\n\nX=%c, TYPE = %c\n\n", parameters[i].x, parameters[i].type);
+        switch(parameters[i].x){
+            case 'p':
+                pos = parameters[i].index-1;
+                if(parameters[i].type == 'a'){
+                    printf("    movq    -%d(%%rbp), %%r%s # r%s = %c%c%d\n", pilha.param[pos].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                }
+                else{
+                    printf("    movl    -%d(%%rbp), %%e%s # e%s = %c%c%d\n", pilha.param[pos].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                }
+                break;
+            case 'v':
+                if( parameters[i].type == 'a' ){
+                    // printf("\na\n");
+                    for(k=0; k<pilha.vet_qtd;k++){
+                        if(pilha.vet[k].ind == parameters[i].index)
+                            printf("    movq    -%d(%%rbp), %%r%s # r%s = %c%c%d\n", pilha.vet[k].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                    }
+                }
+                else if( parameters[i].type == 'r' ){
+                    // printf("\nr\n");
+                    for(k=0; k<pilha.reg_qtd;k++){
+                        if(pilha.reg[k].ind == parameters[i].index)
+                            printf("    movl    %%r%dd, %%e%s # e%s = %c%c%d\n", 12+k, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                    }
+                }
+                else {
+                    // printf("\ni\n");
+                    for(k=0; k<pilha.var_qtd;k++){
+                        if(pilha.var[k].ind == parameters[i].index)
+                            printf("    movl    -%d(%%rbp), %%e%s # e%s = %c%c%d\n", pilha.var[k].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                    }
+                }
+                break;
+            case 'c':
+                printf("    movl    $%d, %%e%s # e%s = %d\n", parameters[i].index, registers_param[i-1], registers_param[i-1], parameters[i].index);
+                break;
+            default:
+                break;
+        }
+    }
+}
