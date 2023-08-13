@@ -33,20 +33,35 @@ reg vr4
 var vi5
 reg vr6
 enddef
-if ci10 le ci10
+if vi3 ne ci10
+endif
+if vi3 ne vr6
+endif
+if vr6 eq vi3
+endif 
+if ci10 ge ci10
 endif
 if ci10 le pi2
 endif
-if ci10 le vi3
+if vr6 le pi2
+endif
+if vr4 lt vi3
 endif
 if ci10 le vr6
 endif
-if ci10 gt ci10
+if vr4 gt vr6
+return vi3
 endif
 if ci10 gt pi2
+return vr6
 endif
 if ci10 gt vi3
+return ci-20
 endif
 if ci10 gt vr6
+return vi5
+endif
+if vi3 gt vr6
+return vi5
 endif
 end

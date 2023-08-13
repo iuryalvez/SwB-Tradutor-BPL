@@ -1,3 +1,17 @@
+/* Dúvidas do pdf de especificações:
+
+Retorno das funções: 
+    -> Na explicação diz que retorna ci, vi ou pi;
+    -> No BNF o <ret> retorna um valint que também pode ser vr;
+    -> Consideramos vr também como retorno.
+
+Get: 
+    -> Na explicação diz que o destino pode ser um vi, vr ou pi;
+    -> No BNF <arrayget> retorna ou varint ou regint, não considera pi;
+    -> Consideramos pi também como destino.
+
+*/
+
 #include "tradutor.h"
 
 int main() {
@@ -17,8 +31,8 @@ int main() {
 
     int nro_param; // Conta os parametros do sscanf da função call; // antigo callss
 
-    Registrador r[MAX_REG];
-    iniciar_registradores(r);
+    Reg_param r[3];
+    iniciar_r(r);
 
     Typecharint parameters[4];
     inicializar_parameters(parameters); // parameters[0].type = 'v' e o resto zera tudo.
@@ -119,21 +133,25 @@ int main() {
             }
 
             if (strncmp(linha, "return", 6) == 0) {
-                sscanf(linha, "return %ci%d", &exp.tipo1[0], &exp.ind1);
+                sscanf(linha, "return %c%c%d", &exp.tipo1[0], &exp.tipo1[1], &exp.ind1);
                 if (exp.tipo1[0] == 'c') {
                     printf("\n    # retorno (%%eax) = %d\n", exp.ind1);
                     printf("    movl    %d, %%eax\n", exp.ind1);
                 }
                 else if (exp.tipo1[0] == 'p') {
-                    printf("\n    # retorno (%%eax) = %%%s\n", r[6-exp.ind1].nome32);
-                    printf("    movl    %%%s, %%eax\n", r[6-exp.ind1].nome32);
+                    printf("\n    # retorno (%%eax) = %%%s\n", r[exp.ind1-1].nome32);
+                    printf("    movl    %%%s, %%eax\n", r[exp.ind1-1].nome32);
                 }
-                else { // vi
+                else if (exp.tipo1[1] == 'r') { // vr
+                    printf("\n    # retorno (%%eax) = vr%d\n", exp.ind1);
+                    exp.ind1 = encontrar_indreg(pilha, exp.ind1);
+                    printf("    movl    %%r%dd, %%eax\n", 11+exp.ind1);
+                }
+                else {
                     printf("\n    # retorno (%%eax) = vi%d\n", exp.ind1);
                     exp.ind1 = encontrar_indvar(pilha, exp.ind1);
                     printf("    movl    -%d(%%rbp), %%eax\n", pilha.var[exp.ind1].pos);
                 }
-
                 // código da finalização de função aqui (recuperação de valores da pilha)
                 print_recuperacao(pilha);
                 printf("\n    leave\n");
@@ -153,24 +171,26 @@ int main() {
                     printf("    imulq   $4, %%r8\n");
                     
                     // acessando o endereço do índice
-                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[6-exp.ind1].nome64);
+                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[exp.ind1-1].nome64);
                     else {
                         exp.ind1 = encontrar_indvet(pilha, exp.ind1);
                         printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[exp.ind1].pos);
                         printf("    addq    %%r9, %%r8\n");
                     }
 
+                    printf("    movl    (%%r8), %%r10d\n");
+
                     // colocando o valor do endereço no lugar de destino
                     if (exp.tipo2[0] == 'p') {
-                        printf("    movl    (%%r8), %%%s\n", r[6-exp.ind2].nome32);
+                        printf("    movl    %%r10d, %%%s\n", r[exp.ind2-1].nome32);
                     } 
                     else if (exp.tipo2[1] == 'i') {
                         exp.ind2 = encontrar_indvar(pilha, exp.ind2);
-                        printf("    movl    (%%r8), -%d(%%rbp)\n", pilha.var[exp.ind2].pos);
+                        printf("    movl    %%r10d, -%d(%%rbp)\n", pilha.var[exp.ind2].pos);
                     } 
                     else {
                         exp.ind2 = encontrar_indreg(pilha, exp.ind2);
-                        printf("    movl    (%%r8), %%r%dd\n", 12+exp.ind2);
+                        printf("    movl    %%r10d, %%r%dd\n", 11+exp.ind2);
                     }
 
                     continue;
@@ -185,7 +205,7 @@ int main() {
                         printf("    movl    $%d, %%r10d\n", exp.ind2);
                     }
                     else if (exp.tipo2[0] == 'p') {
-                        printf("    movl    %%%s, %%r10d\n", r[6-exp.ind2].nome32);
+                        printf("    movl    %%%s, %%r10d\n", r[exp.ind2-1].nome32);
                     }
                     else if (exp.tipo2[1] == 'i') {
                         exp.ind2 = encontrar_indvar(pilha, exp.ind2);
@@ -201,7 +221,7 @@ int main() {
                     printf("    imulq   $4, %%r8\n");
 
                     // acessar o vetor
-                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[6-exp.ind1].nome64);
+                    if (exp.tipo1[0] == 'p') printf("    addq    %%%s, %%r8\n", r[exp.ind1-1].nome64);
                     else {
                         exp.ind1 = encontrar_indvet(pilha, exp.ind1);
                         printf("    leaq    -%d(%%rbp), %%r9\n", pilha.vet[exp.ind1].pos);
@@ -327,30 +347,30 @@ int main() {
                 printf("\n    if0%d:\n", if_cont);
                 
                 // o tipo 1 armazena o que vai ser printado em segundo lugar
-                if (exp.tipo1[0] == 'c') printf("    movl    $%d, %%r8\n", exp.ind1);
-                else if (exp.tipo1[0] == 'p') printf("    movl    %%%s, %%r8\n", r[6 - exp.ind1].nome32);
+                if (exp.tipo1[0] == 'c') printf("    movl    $%d, %%r8d\n", exp.ind1);
+                else if (exp.tipo1[0] == 'p') printf("    movl    %%%s, %%r8d\n", r[exp.ind1-1].nome32);
                 else if (exp.tipo1[1] == 'i') {
                     exp.ind1 = encontrar_indvar(pilha, exp.ind1);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind1].pos);
+                    printf("    movl    -%d(%%rbp), %%r8d\n", pilha.var[exp.ind1].pos);
                 }
                 else {
                     exp.ind1 = encontrar_indreg(pilha, exp.ind1);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind1].pos);
+                    printf("    movl    -%d(%%rbp), %%r8d\n", pilha.reg[exp.ind1].pos);
                 }
                 
                 // o tipo 2 armazena o que vai ser printado em primeiro lugar
-                if (exp.tipo2[0] == 'c') printf("    movl    $%d, %%r9\n", exp.ind2);
-                else if (exp.tipo2[0] == 'p') printf("    movl    %%%s, %%r9\n", r[6 - exp.ind2].nome32);
+                if (exp.tipo2[0] == 'c') printf("    movl    $%d, %%r9d\n", exp.ind2);
+                else if (exp.tipo2[0] == 'p') printf("    movl    %%%s, %%r9d\n", r[exp.ind2-1].nome32);
                 else if (exp.tipo2[1] == 'i') { 
                     exp.ind2 = encontrar_indvar(pilha, exp.ind2);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.var[exp.ind2].pos);
+                    printf("    movl    -%d(%%rbp), %%r8d\n", pilha.var[exp.ind2].pos);
                 }
                 else { 
                     exp.ind1 = encontrar_indreg(pilha, exp.ind2);
-                    printf("    movl    -%d(%%rbp), %%r8\n", pilha.reg[exp.ind2].pos);
+                    printf("    movl    -%d(%%rbp), %%r8d\n", pilha.reg[exp.ind2].pos);
                 }
 
-                printf("    cmpl    %%r9, %%r8\n");
+                printf("    cmpl    %%r9d, %%r8d\n");
 
                 if(oprel[0] == 'e') printf("    jne end_if0%d", if_cont);
                 else if (oprel[0] == 'n') printf("    je end_if0%d", if_cont);

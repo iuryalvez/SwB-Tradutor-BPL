@@ -23,15 +23,12 @@ void remover_newline(char *ptr);
  */
 int ler_linha(char *string);
 
-#define MAX_REG 16     // há 16 registradores
-
-typedef struct registrador {
+typedef struct reg_param {
     char nome32[4]; // nome de 32 bits de um registrador 
     char nome64[4]; // nome de 64 bits de um registrador 
-    int livre;     // disponibilidade do regisrador 
-} Registrador;
+} Reg_param;
 
-void iniciar_registradores(Registrador r[MAX_REG]);
+void iniciar_r(Reg_param r[3]);
 
 // representa uma variávei local do tipo var
 typedef struct Var{
