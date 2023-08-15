@@ -19,11 +19,12 @@ void iniciar_r(Reg_param r[3]) {
     strcpy(r[0].nome32, "edi");
     strcpy(r[0].nome64, "rdi");
     
-    strcpy(r[1].nome32, "edx");
-    strcpy(r[1].nome64, "rdx");
+    strcpy(r[1].nome32, "esi");
+    strcpy(r[1].nome64, "rsi");
 
-    strcpy(r[2].nome32, "esi");
-    strcpy(r[2].nome64, "rsi");
+    strcpy(r[2].nome32, "edx");
+    strcpy(r[2].nome64, "rdx");
+
 }
 
 void inicializar_pilha(Pilha *pilha) {
@@ -72,7 +73,6 @@ void armazenar_pilha(Pilha *pilha) {
     // armazenar variáveis locais do tipo vet
     if (pilha->vet_qtd) {
         for (i = 0; i < pilha->vet_qtd; i++) {
-            // alinhar(&(pilha->rsp), 8);
             pilha->rsp += 4 * pilha->vet[i].size;
             pilha->vet[i].pos = pilha->rsp;
             printf("    # va%d: -%d\n", pilha->vet[i].ind, pilha->vet[i].pos);
@@ -84,7 +84,8 @@ void armazenar_pilha(Pilha *pilha) {
     // só irá armazenar os reg que a função utilizar (definidos no def enddef)
     if (pilha->reg_qtd) {
         for (i = 0; i < pilha->reg_qtd; i++) {
-            pilha->rsp += 4;
+            alinhar(pilha->rsp, 8);
+            pilha->rsp += 8;
             pilha->reg[i].pos = pilha->rsp;
             printf("    # vr%d: -%d\n", pilha->reg[i].ind, pilha->reg[i].pos);
         }
@@ -126,7 +127,7 @@ void print_armazenamento(Pilha pilha) {
     if (pilha.reg_qtd) {
         for (i = 0; i < pilha.reg_qtd; i++) {
             printf("\n    # vr%d -> %%r%dd\n", pilha.reg[i].ind, i+12);
-            printf("    movl    %%r%dd, -%d(%%rbp)\n", i+12, pilha.reg[i].pos);
+            printf("    movl    %%r%d, -%d(%%rbp)\n", i+12, pilha.reg[i].pos);
         }
     }
 }
@@ -141,7 +142,7 @@ void print_recuperacao(Pilha pilha) {
     int i;
     if (pilha.reg_qtd) {
         for (i = pilha.reg_qtd-1; i >= 0; i--) {
-            printf("\n    # devolvendo o valor do %%r%dd anterior\n", i+12);
+            printf("\n    # devolvendo o valor do %%r%d anterior\n", i+12);
             printf("    movl    -%d(%%rbp), %%r%dd\n", pilha.reg[i].pos, i+12);
         }
     }
@@ -218,7 +219,7 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
                     // printf("\na\n");
                     for(k=0; k<pilha.vet_qtd;k++){
                         if(pilha.vet[k].ind == parameters[i].index)
-                            printf("    movq    -%d(%%rbp), %%r%s # r%s = %c%c%d\n", pilha.vet[k].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
+                            printf("    leaq    -%d(%%rbp), %%r%s # r%s = %c%c%d\n", pilha.vet[k].pos, registers_param[i-1], registers_param[i-1], parameters[i].x, parameters[i].type, parameters[i].index);
                     }
                 }
                 else if( parameters[i].type == 'r' ){
@@ -247,7 +248,6 @@ void atribui_call(Pilha pilha, Typecharint * parameters, int numero_args, char *
 void expressions(Pilha pilha, char operator, Typecharint * parameters, int qtd, char ** registers_param){
     int pos;
     int i;
-    int k;
     int pos1, pos2, pos3;
     int isAtribute3, isAtribute2, isAtribute1;
 
