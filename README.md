@@ -1,5 +1,5 @@
 # Tradutor BPL (Bruno's Programming Language) para Assembly AMD64
-Repositório criado para implementação do trabalho que compõe a nota final da disciplina de Software Básico do curso de Ciência da Computação da UFG.
+Repositório criado para implementação do trabalho que compõe a nota da disciplina de Software Básico do curso de Ciência da Computação da UFG.
 
 <!-- ### Rafael
 - [x] Implementar o assembly de início da chamada das funções.
@@ -21,7 +21,7 @@ Repositório criado para implementação do trabalho que compõe a nota final da
 - [x] Implementar o assembly de atribuições e expressões. -->
 
 ## Introdução
-O trabalho propõe a criação de um tradutor de BPL para Assembly AMD64. O enunciado do projeto está na pasta "especificacoes" que contém 2 pdf's das versões do trabalho.
+O trabalho propõe a criação de um tradutor de BPL para Assembly AMD64. O enunciado do projeto está na pasta "especificacoes" que contém 3 pdf's das versões do trabalho.
 
 ## Desenvolvimento
 O projeto foi modularizado em tradutor.c, main.c, tradutor.h e uma pasta de testes.
@@ -30,7 +30,7 @@ O projeto foi modularizado em tradutor.c, main.c, tradutor.h e uma pasta de test
 O tradutor deve ler um arquivo em BPL da entrada padrão (e.g., usando o scanf) e imprimir a tradução desse programa em Assembly na saída padrão (e.g., usando o printf). Pode-se criar um arquivo com a linguagem e utilizar o redirecionamento para testar:
 
 ` gcc -o tradutor main.c tradutor.c `
-` ./tradutor < prog.bpl `
+` ./tradutor < "seuinput".bpl `
 
 ## Desenvolvedores
 - [Iury Alexandre Alves Bo](https://github.com/iuryalvez)
